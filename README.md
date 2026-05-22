@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎓 Smart Campus Management System (SCMS)
 
 A **next-generation, full-stack Campus Management System** with a futuristic black-and-white glassmorphism UI, real-time notifications, and AI chatbot assistant.
