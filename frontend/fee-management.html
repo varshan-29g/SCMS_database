@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fee Management — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas><div id="page-overlay"></div>
+<div id="loading-screen"><div class="loading-logo">SCMS<span>.</span></div><div class="loading-bar-wrap"><div class="loading-bar"></div></div></div>
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+<div class="main-content">
+<header class="page-header">
+  <button class="header-toggle" id="sidebar-toggle">☰</button>
+  <div class="header-title">Fee Management</div>
+  <div class="header-actions">
+    <button class="header-btn" id="theme-toggle">🌙</button>
+    <a href="notifications.html" class="header-btn">🔔</a>
+  </div>
+</header>
+<div class="page-body">
+  <h1 class="page-title">Fee Management</h1>
+  <p class="page-subtitle">Track payments, manage dues, and generate receipts.</p>
+
+  <div class="fee-summary">
+    <div class="fee-summary-card">
+      <div class="kpi-label">Total Collected</div>
+      <div class="fee-amount collected" id="fee-collected">₹—</div>
+    </div>
+    <div class="fee-summary-card">
+      <div class="kpi-label">Pending Amount</div>
+      <div class="fee-amount pending" id="fee-pending">₹—</div>
+    </div>
+    <div class="fee-summary-card">
+      <div class="kpi-label">Overdue Records</div>
+      <div class="fee-amount overdue" id="fee-overdue-count">—</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="all">All Fees</button>
+    <button class="tab-btn" data-tab="pending">Pending / Overdue</button>
+    <button class="tab-btn" data-tab="addfee" id="add-fee-tab" style="display:none">Add Fee Record</button>
+  </div>
+
+  <div id="tab-all">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <div class="card-title">Fee Records</div>
+        <div style="display:flex;gap:10px">
+          <select class="form-control" id="status-filter" style="height:36px;font-size:0.85rem;width:140px">
+            <option value="">All Status</option>
+            <option>Paid</option><option>Pending</option><option>Overdue</option><option>Waived</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Student</th><th>Fee Type</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Receipt</th><th class="admin-only" style="display:none">Action</th></tr></thead>
+        <tbody id="fee-tbody"><tr><td colspan="7" class="table-empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-pending" style="display:none">
+    <div class="table-wrapper">
+      <div class="table-toolbar"><div class="card-title">Pending & Overdue Fees</div></div>
+      <table>
+        <thead><tr><th>Student</th><th>Fee Type</th><th>Amount</th><th>Due Date</th><th>Status</th><th class="admin-only" style="display:none">Action</th></tr></thead>
+        <tbody id="pending-tbody"><tr><td colspan="6" class="table-empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="tab-addfee" style="display:none">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Add New Fee Record</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group"><label class="form-label">Student ID</label><input class="form-control" type="number" id="af-student"/></div>
+        <div class="form-group"><label class="form-label">Fee Type</label><input class="form-control" id="af-type" placeholder="e.g. Tuition Fee Sem 6"/></div>
+        <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-control" type="number" id="af-amount"/></div>
+        <div class="form-group"><label class="form-label">Scholarship (₹)</label><input class="form-control" type="number" id="af-scholarship" value="0"/></div>
+        <div class="form-group"><label class="form-label">Due Date</label><input class="form-control" type="date" id="af-due"/></div>
+        <div class="form-group"><label class="form-label">Payment Mode</label>
+          <select class="form-control" id="af-mode"><option>Online</option><option>Cash</option><option>DD</option><option>Cheque</option></select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">Remarks</label><textarea class="form-control" id="af-remarks" rows="2"></textarea></div>
+        <div><button type="button" class="btn btn-primary" id="save-fee-btn">Add Fee Record</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header"><div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div><button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button></div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row"><input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/><button class="chatbot-send" id="chatbot-send">➤</button></div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin','Student','Faculty'])) return;
+  const role = Auth.getRole();
+  const user = Auth.getUser();
+  injectSidebar(role);
+  initSidebar();
+
+  if (role === 'Admin') {
+    document.getElementById('add-fee-tab').style.display = '';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+  }
+
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
+      document.getElementById('tab-'+btn.dataset.tab).style.display='';
+    });
+  });
+
+  if (role === 'Admin') {
+    const stats = await API.get('/fees/stats');
+    if (stats?.success) {
+      document.getElementById('fee-collected').textContent = fmt.currency(stats.data.collected);
+      document.getElementById('fee-pending').textContent   = fmt.currency(stats.data.pending);
+      document.getElementById('fee-overdue-count').textContent = stats.data.overdue_count || 0;
+    }
+  }
+
+  async function loadFees(status='') {
+    const ep = role === 'Student'
+      ? `/fees/student/${user.id}`
+      : `/fees?limit=30${status?'&status='+status:''}`;
+    const data = await API.get(ep);
+    const tbody = document.getElementById('fee-tbody');
+    if (!tbody || !data?.success) return;
+    tbody.innerHTML = data.data.length
+      ? data.data.map(f=>`<tr>
+          <td class="td-primary">${f.student_name||user?.name||'You'}</td>
+          <td>${f.fee_type}</td>
+          <td>${fmt.currency(f.amount)}</td>
+          <td class="td-muted">${fmt.date(f.due_date)}</td>
+          <td><span class="badge ${f.status==='Paid'?'badge-success':f.status==='Overdue'?'badge-danger':'badge-warning'}">${f.status}</span></td>
+          <td class="td-muted">${f.receipt_no||'—'}</td>
+          ${role==='Admin'&&f.status!=='Paid'?`<td><button class="btn btn-primary btn-sm" onclick="markPaid(${f.id})">Mark Paid</button></td>`:'<td>—</td>'}
+        </tr>`).join('')
+      : '<tr><td colspan="7" class="table-empty">No fee records</td></tr>';
+  }
+  loadFees();
+  document.getElementById('status-filter').addEventListener('change', e => loadFees(e.target.value));
+
+  const pendingData = await API.get('/fees/pending');
+  const ptbody = document.getElementById('pending-tbody');
+  if (ptbody && pendingData?.success) {
+    ptbody.innerHTML = pendingData.data.length
+      ? pendingData.data.map(f=>`<tr>
+          <td class="td-primary">${f.student_name||'—'}</td>
+          <td>${f.fee_type}</td>
+          <td style="font-weight:600">${fmt.currency(f.amount)}</td>
+          <td class="td-muted">${fmt.date(f.due_date)}</td>
+          <td><span class="badge ${f.status==='Overdue'?'badge-danger':'badge-warning'}">${f.status}</span></td>
+          ${role==='Admin'?`<td><button class="btn btn-primary btn-sm" onclick="markPaid(${f.id})">Mark Paid</button></td>`:'<td>—</td>'}
+        </tr>`).join('')
+      : '<tr><td colspan="6" class="table-empty">No pending fees 🎉</td></tr>';
+  }
+
+  window.markPaid = async (id) => {
+    const data = await API.put(`/fees/${id}/pay`, {});
+    if (data?.success) { showToast('Fee paid!',`Receipt: ${data.receipt_no}`,'success'); loadFees(); }
+    else showToast('Error', data?.message, 'error');
+  };
+
+  document.getElementById('save-fee-btn')?.addEventListener('click', async () => {
+    const data = await API.post('/fees', {
+      student_id:  document.getElementById('af-student').value,
+      fee_type:    document.getElementById('af-type').value,
+      amount:      document.getElementById('af-amount').value,
+      scholarship: document.getElementById('af-scholarship').value,
+      due_date:    document.getElementById('af-due').value,
+      payment_mode:document.getElementById('af-mode').value,
+      remarks:     document.getElementById('af-remarks').value,
+    });
+    if (data?.success) { showToast('Fee added!','','success'); loadFees(); }
+    else showToast('Error', data?.message, 'error');
+  });
+});
+</script>
+</body>
+</html>

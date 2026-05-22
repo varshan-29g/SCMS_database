@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Profile — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas><div id="page-overlay"></div>
+<div id="loading-screen"><div class="loading-logo">SCMS<span>.</span></div><div class="loading-bar-wrap"><div class="loading-bar"></div></div></div>
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+<div class="main-content">
+<header class="page-header">
+  <button class="header-toggle" id="sidebar-toggle">☰</button>
+  <div class="header-title">Profile Settings</div>
+  <div class="header-actions">
+    <button class="header-btn" id="theme-toggle">🌙</button>
+    <a href="notifications.html" class="header-btn">🔔</a>
+  </div>
+</header>
+<div class="page-body">
+  <h1 class="page-title">My Profile</h1>
+  <p class="page-subtitle">Manage your personal information and account settings.</p>
+
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar" id="profile-avatar">👤</div>
+      <label class="avatar-upload-btn" for="avatar-upload" title="Change photo">📷</label>
+      <input type="file" id="avatar-upload" accept="image/*" style="display:none"/>
+    </div>
+    <div class="profile-info-wrap">
+      <div class="profile-name" id="profile-name">Loading...</div>
+      <div class="profile-role-badge" id="profile-role">—</div>
+      <div class="profile-meta" id="profile-meta"></div>
+    </div>
+    <div style="margin-left:auto">
+      <button class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="info">Personal Info</button>
+    <button class="tab-btn" data-tab="security">Security</button>
+    <button class="tab-btn" data-tab="preferences">Preferences</button>
+  </div>
+
+  <!-- Personal Info -->
+  <div id="tab-info">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Personal Information</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="profile-form">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="p-name"/></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" id="p-email" readonly style="opacity:0.6"/></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="p-phone"/></div>
+        <div class="form-group" id="dob-group" style="display:none"><label class="form-label">Date of Birth</label><input class="form-control" type="date" id="p-dob"/></div>
+        <div class="form-group" id="gender-group" style="display:none"><label class="form-label">Gender</label><select class="form-control" id="p-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group" id="address-group" style="display:none;grid-column:1/-1"><label class="form-label">Address</label><textarea class="form-control" id="p-address" rows="2"></textarea></div>
+        <div class="form-group" id="dept-info" style="display:none"><label class="form-label">Department</label><input class="form-control" id="p-dept" readonly style="opacity:0.6"/></div>
+        <div class="form-group" id="sem-info" style="display:none"><label class="form-label">Semester</label><input class="form-control" id="p-sem" readonly style="opacity:0.6"/></div>
+        <div class="form-group" id="desig-group" style="display:none"><label class="form-label">Designation</label><input class="form-control" id="p-desig" readonly style="opacity:0.6"/></div>
+        <div class="form-group" id="qual-group" style="display:none"><label class="form-label">Qualification</label><input class="form-control" id="p-qual" readonly style="opacity:0.6"/></div>
+      </div>
+    </div>
+
+    <!-- ID Card preview -->
+    <div class="card" style="margin-top:20px" id="id-card-section">
+      <div class="card-header"><div class="card-title">Digital ID Card</div><button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button></div>
+      <div id="id-card" style="border:2px solid var(--border);border-radius:var(--radius-md);padding:24px;display:flex;gap:20px;align-items:center;max-width:480px;background:var(--bg-secondary)">
+        <div style="width:70px;height:70px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0" id="card-avatar">👤</div>
+        <div>
+          <div style="font-size:0.65rem;font-weight:600;letter-spacing:0.12em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Smart Campus Management System</div>
+          <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700" id="card-name">—</div>
+          <div style="font-size:0.78rem;color:var(--text-muted)" id="card-role">—</div>
+          <div style="font-size:0.78rem;font-weight:600;margin-top:4px" id="card-id">ID: —</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px" id="card-dept">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div id="tab-security" style="display:none">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Change Password</div></div>
+      <div style="max-width:420px;display:flex;flex-direction:column;gap:16px">
+        <div class="form-group"><label class="form-label">Current Password</label><input class="form-control" type="password" id="cur-pw" placeholder="Enter current password"/></div>
+        <div class="form-group"><label class="form-label">New Password</label><input class="form-control" type="password" id="new-pw" placeholder="Min 8 characters"/></div>
+        <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-control" type="password" id="confirm-pw" placeholder="Repeat new password"/></div>
+        <button class="btn btn-primary" id="change-pw-btn">Update Password</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-header"><div class="card-title">Active Sessions</div></div>
+      <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:500;font-size:0.875rem">Current Session</div>
+          <div style="font-size:0.78rem;color:var(--text-muted)">This device · Active now</div>
+        </div>
+        <span class="badge badge-success">Active</span>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-danger btn-sm" id="logout-all-btn">Logout from all devices</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preferences -->
+  <div id="tab-preferences" style="display:none">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Appearance & Preferences</div></div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><div style="font-weight:500">Dark Mode</div><div style="font-size:0.8rem;color:var(--text-muted)">Switch between light and dark theme</div></div>
+          <button class="btn btn-secondary" id="pref-theme-btn">Toggle Theme</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)">
+          <div><div style="font-weight:500">Email Notifications</div><div style="font-size:0.8rem;color:var(--text-muted)">Receive email alerts for fees, exams, and events</div></div>
+          <span class="badge badge-neutral">Coming Soon</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0">
+          <div><div style="font-weight:500">Export Data</div><div style="font-size:0.8rem;color:var(--text-muted)">Download your academic records</div></div>
+          <span class="badge badge-neutral">Coming Soon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header"><div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div><button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button></div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row"><input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/><button class="chatbot-send" id="chatbot-send">➤</button></div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin','Student','Faculty'])) return;
+  const role = Auth.getRole();
+  const user = Auth.getUser();
+  injectSidebar(role);
+  initSidebar();
+
+  // Tabs
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
+      document.getElementById('tab-'+btn.dataset.tab).style.display='';
+    });
+  });
+
+  // Load profile data
+  let profileData = {};
+  try {
+    if (role === 'Student') {
+      const data = await API.get(`/students/${user.id}`);
+      if (data?.success) profileData = data.data;
+      document.getElementById('dob-group').style.display='';
+      document.getElementById('gender-group').style.display='';
+      document.getElementById('address-group').style.display='';
+      document.getElementById('dept-info').style.display='';
+      document.getElementById('sem-info').style.display='';
+    } else if (role === 'Faculty') {
+      const data = await API.get(`/faculty/${user.id}`);
+      if (data?.success) profileData = data.data;
+      document.getElementById('dept-info').style.display='';
+      document.getElementById('desig-group').style.display='';
+      document.getElementById('qual-group').style.display='';
+    }
+  } catch(e) { profileData = user || {}; }
+
+  // Populate fields
+  const pName = document.getElementById('p-name');
+  const pEmail = document.getElementById('p-email');
+  if (pName)  pName.value  = profileData.name  || user?.name  || '';
+  if (pEmail) pEmail.value = profileData.email || user?.email || '';
+  document.getElementById('p-phone').value  = profileData.phone || '';
+  if (document.getElementById('p-dob'))     document.getElementById('p-dob').value     = profileData.dob ? profileData.dob.slice(0,10) : '';
+  if (document.getElementById('p-gender'))  document.getElementById('p-gender').value  = profileData.gender || 'Male';
+  if (document.getElementById('p-address')) document.getElementById('p-address').value = profileData.address || '';
+  if (document.getElementById('p-dept'))    document.getElementById('p-dept').value    = profileData.dept_name || '—';
+  if (document.getElementById('p-sem'))     document.getElementById('p-sem').value     = profileData.semester ? `Semester ${profileData.semester}` : '—';
+  if (document.getElementById('p-desig'))   document.getElementById('p-desig').value   = profileData.designation || '—';
+  if (document.getElementById('p-qual'))    document.getElementById('p-qual').value    = profileData.qualification || '—';
+
+  // Header
+  document.getElementById('profile-name').textContent = profileData.name || user?.name || 'User';
+  document.getElementById('profile-role').textContent = role;
+
+  const metaEl = document.getElementById('profile-meta');
+  if (metaEl) {
+    const items = [];
+    if (profileData.email)          items.push(`📧 ${profileData.email}`);
+    if (profileData.phone)          items.push(`📞 ${profileData.phone}`);
+    if (profileData.dept_name)      items.push(`🏛 ${profileData.dept_name}`);
+    if (profileData.student_id)     items.push(`🎓 ${profileData.student_id}`);
+    if (profileData.faculty_id)     items.push(`👨‍🏫 ${profileData.faculty_id}`);
+    metaEl.innerHTML = items.map(i=>`<div class="profile-meta-item">${i}</div>`).join('');
+  }
+
+  // Avatar
+  const avatarEl = document.getElementById('profile-avatar');
+  const cardAvatarEl = document.getElementById('card-avatar');
+  if (profileData.avatar) {
+    const img = `<img src="http://localhost:5000${profileData.avatar}" alt="Avatar"/>`;
+    avatarEl.innerHTML = img;
+    cardAvatarEl.innerHTML = img;
+  } else {
+    const initials = fmt.initials(profileData.name || user?.name || '?');
+    avatarEl.textContent = initials;
+    cardAvatarEl.textContent = initials;
+  }
+
+  // ID Card
+  document.getElementById('card-name').textContent = profileData.name || user?.name || '—';
+  document.getElementById('card-role').textContent = role;
+  document.getElementById('card-id').textContent = `ID: ${profileData.student_id || profileData.faculty_id || user?.id || '—'}`;
+  document.getElementById('card-dept').textContent = profileData.dept_name || '—';
+
+  // Avatar upload
+  document.getElementById('avatar-upload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('avatar', file);
+    const table = role === 'Student' ? 'students' : role === 'Faculty' ? 'faculty' : 'admin';
+    const endpoint = `/${role === 'Student' ? 'students' : 'faculty'}/${user.id}/avatar`;
+    const headers = { 'Authorization': `Bearer ${Auth.getToken()}` };
+    const res = await fetch(`http://localhost:5000/api${endpoint}`, { method: 'PUT', headers, body: fd });
+    const data = await res.json();
+    if (data?.success) {
+      const img = `<img src="http://localhost:5000${data.url}" alt="Avatar"/>`;
+      avatarEl.innerHTML = img;
+      cardAvatarEl.innerHTML = img;
+      showToast('Avatar updated!','','success');
+    }
+  });
+
+  // Save profile
+  document.getElementById('save-profile-btn').addEventListener('click', async () => {
+    let ep, payload;
+    if (role === 'Student') {
+      ep = `/students/${user.id}`;
+      payload = { name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value, dob: document.getElementById('p-dob').value, gender: document.getElementById('p-gender').value, address: document.getElementById('p-address').value };
+    } else if (role === 'Faculty') {
+      ep = `/faculty/${user.id}`;
+      payload = { name: document.getElementById('p-name').value, phone: document.getElementById('p-phone').value };
+    } else return showToast('Admin profile update via DB only','','info');
+    const data = await API.put(ep, payload);
+    if (data?.success) { showToast('Profile updated!','','success'); document.getElementById('profile-name').textContent = payload.name; }
+    else showToast('Error', data?.message, 'error');
+  });
+
+  // Change password (stub — needs backend endpoint)
+  document.getElementById('change-pw-btn').addEventListener('click', () => {
+    const np = document.getElementById('new-pw').value;
+    const cp = document.getElementById('confirm-pw').value;
+    if (np !== cp) { showToast('Passwords do not match','','error'); return; }
+    if (np.length < 8) { showToast('Password must be at least 8 characters','','warning'); return; }
+    showToast('Password change coming soon','Contact admin for password reset','info');
+  });
+
+  // Preferences theme
+  document.getElementById('pref-theme-btn').addEventListener('click', toggleTheme);
+
+  // Logout all
+  document.getElementById('logout-all-btn').addEventListener('click', () => {
+    Auth.clear();
+    window.location.href = 'login.html';
+  });
+});
+</script>
+</body>
+</html>

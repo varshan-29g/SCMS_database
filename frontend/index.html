@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SCMS — Smart Campus Management System</title>
+<meta name="description" content="Next-generation AI-powered Smart Campus Management System for universities and colleges."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="loading-logo">SCMS<span>.</span></div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<!-- Page Overlay -->
+<div id="page-overlay"></div>
+
+<!-- LANDING -->
+<div class="landing">
+  <!-- Nav -->
+  <nav class="landing-nav" id="landing-nav">
+    <div class="landing-logo">SC<span>M</span>S</div>
+    <div class="landing-nav-links">
+      <a href="#features">Features</a>
+      <a href="#modules">Modules</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="landing-nav-actions">
+      <button id="theme-toggle" class="btn btn-ghost btn-sm">🌙</button>
+      <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
+      <a href="login.html?tab=register" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge"><div class="hero-badge-dot"></div> AI-Powered Campus Platform</div>
+    <h1 class="hero-title">Smart Campus<br/><span>Management</span><br/>System</h1>
+    <p class="hero-desc">A next-generation, fully integrated university management platform combining AI analytics, real-time tracking, and seamless administration.</p>
+    <div class="hero-actions">
+      <a href="login.html" class="btn btn-primary btn-lg">🚀 Launch Dashboard</a>
+      <a href="#features"  class="btn btn-ghost btn-lg">Explore Features</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value" data-count="10">0</div>
+        <div class="hero-stat-label">Management Modules</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" data-count="16">0</div>
+        <div class="hero-stat-label">Database Tables</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" data-count="50">0+</div>
+        <div class="hero-stat-label">REST API Endpoints</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value" data-count="3">0</div>
+        <div class="hero-stat-label">User Roles</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" style="position:relative;z-index:1;padding:0 60px 20px">
+    <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:-0.02em">Everything in One Place</h2>
+    <p style="text-align:center;color:var(--text-muted);margin-bottom:48px;font-size:0.95rem">All campus operations unified under a single intelligent platform</p>
+  </section>
+  <div class="features-grid" id="modules">
+    <div class="feature-card"><div class="feature-icon">🎓</div><div class="feature-title">Student Management</div><div class="feature-desc">Complete student lifecycle — registration, profiles, enrollment, ID cards, and academic records.</div></div>
+    <div class="feature-card"><div class="feature-icon">👨‍🏫</div><div class="feature-title">Faculty Management</div><div class="feature-desc">Faculty profiles, subject allocation, leave management, and material uploads.</div></div>
+    <div class="feature-card"><div class="feature-icon">📋</div><div class="feature-title">Attendance System</div><div class="feature-desc">Daily attendance, bulk marking, percentage tracking, low-attendance alerts and analytics.</div></div>
+    <div class="feature-card"><div class="feature-icon">📝</div><div class="feature-title">Examination Module</div><div class="feature-desc">Exam scheduling, hall tickets, marks entry, grade calculation and rank list generation.</div></div>
+    <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Fee Management</div><div class="feature-desc">Payment records, receipts, pending alerts, scholarship management and payment history.</div></div>
+    <div class="feature-card"><div class="feature-icon">📚</div><div class="feature-title">Library System</div><div class="feature-desc">Book inventory, issue/return tracking, fine calculation, and full-text search.</div></div>
+    <div class="feature-card"><div class="feature-icon">🏠</div><div class="feature-title">Hostel Management</div><div class="feature-desc">Room allocation, capacity tracking, hostel fee, and allocation management.</div></div>
+    <div class="feature-card"><div class="feature-icon">🔔</div><div class="feature-title">Smart Notifications</div><div class="feature-desc">Real-time Socket.io notifications for exams, fees, events, and circulars.</div></div>
+    <div class="feature-card"><div class="feature-icon">📅</div><div class="feature-title">Timetable Manager</div><div class="feature-desc">Department and faculty timetables with drag-and-drop scheduling interface.</div></div>
+  </div>
+
+  <!-- Tech Stack -->
+  <section style="padding:60px;text-align:center;position:relative;z-index:1;" id="about">
+    <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;margin-bottom:8px">Built with Modern Stack</h2>
+    <p style="color:var(--text-muted);margin-bottom:40px;font-size:0.9rem">Production-ready architecture with best-in-class tools</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">Node.js + Express</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">MySQL 8.0</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">JWT Auth</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">Socket.io</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">Three.js</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">GSAP</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">Chart.js</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">bcryptjs</span>
+      <span class="badge badge-neutral" style="padding:8px 18px;font-size:0.85rem">Multer</span>
+    </div>
+    <div style="margin-top:48px">
+      <a href="login.html" class="btn btn-primary btn-lg">Get Started Now →</a>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <p>© 2024 Smart Campus Management System — Built for next-generation education institutions</p>
+  </footer>
+</div>
+
+<!-- Toast -->
+<div id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+  // Animate hero stat counters
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count);
+        const suffix = el.dataset.count.includes('+') ? '+' : '';
+        animateCounter(el, target, suffix);
+      });
+    }, 2000);
+
+    // Sticky nav
+    const nav = document.getElementById('landing-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Notifications — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas><div id="page-overlay"></div>
+<div id="loading-screen"><div class="loading-logo">SCMS<span>.</span></div><div class="loading-bar-wrap"><div class="loading-bar"></div></div></div>
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+<div class="main-content">
+<header class="page-header">
+  <button class="header-toggle" id="sidebar-toggle">☰</button>
+  <div class="header-title">Notification Center</div>
+  <div class="header-actions">
+    <button class="header-btn" id="theme-toggle">🌙</button>
+    <button class="btn btn-ghost btn-sm" id="mark-all-read-btn">Mark all read</button>
+  </div>
+</header>
+
+<div class="page-body">
+  <h1 class="page-title">Notifications</h1>
+  <p class="page-subtitle">Stay updated with campus announcements, alerts, and reminders.</p>
+
+  <!-- Filter tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-filter="all">All</button>
+    <button class="tab-btn" data-filter="Info">Info</button>
+    <button class="tab-btn" data-filter="Exam">Exams</button>
+    <button class="tab-btn" data-filter="Fee">Fees</button>
+    <button class="tab-btn" data-filter="Event">Events</button>
+    <button class="tab-btn" data-filter="Warning">Warnings</button>
+    <button class="tab-btn" data-filter="Circular">Circulars</button>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div id="notifications-list" class="notif-list">
+      <div style="padding:48px;text-align:center;color:var(--text-muted)">Loading notifications...</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header"><div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div><button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button></div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row"><input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/><button class="chatbot-send" id="chatbot-send">➤</button></div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+const NOTIF_ICONS = { Exam:'📝', Fee:'💰', Event:'🎉', Warning:'⚠️', Info:'ℹ️', Circular:'📢' };
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin','Student','Faculty'])) return;
+  const role = Auth.getRole();
+  injectSidebar(role);
+  initSidebar();
+
+  let allNotifs = [];
+  let activeFilter = 'all';
+
+  function renderNotifs(filter = 'all') {
+    const list = document.getElementById('notifications-list');
+    const filtered = filter === 'all' ? allNotifs : allNotifs.filter(n => n.type === filter);
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔔</div><div class="empty-state-title">No notifications</div><div class="empty-state-desc">You\'re all caught up!</div></div>';
+      return;
+    }
+    list.innerHTML = filtered.map(n => `
+      <div class="notif-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}">
+        <div class="notif-icon ${n.type.toLowerCase()}">${NOTIF_ICONS[n.type]||'🔔'}</div>
+        <div style="flex:1">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-msg">${n.message}</div>
+          <div class="notif-time">${fmt.date(n.created_at)} · ${n.target_role}</div>
+        </div>
+        ${!n.is_read ? '<div class="notif-unread-dot"></div>' : ''}
+        ${role==='Admin' ? `<button class="btn btn-ghost btn-sm" onclick="deleteNotif(${n.id})">✕</button>` : ''}
+      </div>`).join('');
+
+    // Click to mark read
+    document.querySelectorAll('.notif-item').forEach(item => {
+      item.addEventListener('click', async (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        const id = item.dataset.id;
+        const notif = allNotifs.find(n=>n.id==id);
+        if (notif && !notif.is_read) {
+          await API.put(`/notifications/${id}/read`, {});
+          notif.is_read = 1;
+          item.classList.remove('unread');
+          item.querySelector('.notif-unread-dot')?.remove();
+        }
+      });
+    });
+  }
+
+  // Load notifications
+  const data = await API.get('/notifications');
+  if (data?.success) {
+    allNotifs = data.data;
+    renderNotifs();
+  }
+
+  // Filter tabs
+  document.querySelectorAll('.tab-btn[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-filter]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderNotifs(activeFilter);
+    });
+  });
+
+  // Mark all read
+  document.getElementById('mark-all-read-btn').addEventListener('click', async () => {
+    await API.put('/notifications/read-all', {});
+    allNotifs.forEach(n => n.is_read = 1);
+    renderNotifs(activeFilter);
+    showToast('All notifications marked as read', '', 'success');
+  });
+
+  window.deleteNotif = async (id) => {
+    const data = await API.delete(`/notifications/${id}`);
+    if (data?.success) {
+      allNotifs = allNotifs.filter(n=>n.id!=id);
+      renderNotifs(activeFilter);
+      showToast('Notification deleted','','success');
+    }
+  };
+
+  // Real-time via Socket.io
+  try {
+    const socket = io('http://localhost:5000');
+    socket.on('new_notification', (notif) => {
+      allNotifs.unshift({ ...notif, is_read: 0, created_at: new Date().toISOString() });
+      renderNotifs(activeFilter);
+      showToast(notif.title, notif.message, 'info');
+    });
+  } catch(e) { /* Socket.io not critical */ }
+});
+</script>
+</body>
+</html>

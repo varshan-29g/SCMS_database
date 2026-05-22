@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div id="page-overlay"></div>
+<div id="loading-screen">
+  <div class="loading-logo">SCMS<span>.</span></div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+  <div class="main-content" id="main-content">
+    <!-- Header -->
+    <header class="page-header">
+      <button class="header-toggle" id="sidebar-toggle">☰</button>
+      <div class="header-title">Admin Dashboard</div>
+      <div class="header-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search anything..."/>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="theme-toggle">🌙</button>
+        <a href="notifications.html" class="header-btn">
+          🔔 <span class="header-badge" id="notif-badge" style="display:none"></span>
+        </a>
+        <a href="profile.html" class="header-btn">👤</a>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <div class="page-body">
+      <div>
+        <h1 class="page-title" id="welcome-title">Good morning, Admin 👋</h1>
+        <p class="page-subtitle">Here's what's happening across your campus today.</p>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="quick-action" data-modal-open="add-student-modal">➕ Add Student</div>
+        <div class="quick-action" data-modal-open="add-faculty-modal">➕ Add Faculty</div>
+        <div class="quick-action" data-modal-open="send-notif-modal">📢 Send Notification</div>
+        <a href="fee-management.html" class="quick-action">💰 Fee Overview</a>
+        <a href="analytics.html" class="quick-action">📊 Analytics</a>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card animate-fade-up">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-value" id="stat-students">—</div>
+          <div class="stat-label">Total Students</div>
+          <div class="stat-change up" id="stat-students-new">Loading...</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-1">
+          <div class="stat-icon">👨‍🏫</div>
+          <div class="stat-value" id="stat-faculty">—</div>
+          <div class="stat-label">Faculty Members</div>
+          <div class="stat-change up">Across all departments</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-2">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value" id="stat-fees-collected">—</div>
+          <div class="stat-label">Fees Collected</div>
+          <div class="stat-change up" id="stat-fees-pending">Loading...</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-3">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="stat-books">—</div>
+          <div class="stat-label">Library Books</div>
+          <div class="stat-change up">Available copies</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Attendance Overview</div><div class="card-subtitle">Monthly attendance trends</div></div>
+          </div>
+          <div class="chart-container"><canvas id="attendance-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Students by Dept</div></div>
+          <div class="chart-container"><canvas id="dept-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Activity + Notifications -->
+      <div class="activity-row">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Fee Collection Status</div></div>
+          </div>
+          <div class="chart-container"><canvas id="fee-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Activity</div>
+            <a href="notifications.html" style="font-size:0.8rem;color:var(--text-muted)">View all →</a>
+          </div>
+          <div class="activity-feed" id="activity-feed">
+            <div class="skeleton skeleton-text" style="width:80%"></div>
+            <div class="skeleton skeleton-text" style="width:65%;margin-top:12px"></div>
+            <div class="skeleton skeleton-text" style="width:75%;margin-top:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students Table -->
+      <div id="students" style="margin-top:28px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">Recent Students</div>
+            <div style="display:flex;gap:10px">
+              <div class="table-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search students..." id="student-search"/>
+              </div>
+              <button class="btn btn-primary btn-sm" data-modal-open="add-student-modal">+ Add Student</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Student ID</th><th>Name</th><th>Department</th><th>Semester</th><th>Email</th><th>Status</th><th>Action</th>
+            </tr></thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="7" class="table-empty">Loading...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <div class="pagination-info" id="student-page-info">—</div>
+            <div class="pagination-btns" id="student-pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Faculty Table -->
+      <div id="faculty" style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">Faculty Members</div>
+            <button class="btn btn-primary btn-sm" data-modal-open="add-faculty-modal">+ Add Faculty</button>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Faculty ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Email</th><th>Action</th>
+            </tr></thead>
+            <tbody id="faculty-tbody">
+              <tr><td colspan="6" class="table-empty">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div id="recent-notifications" style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">Recent Notifications</div>
+            <button class="btn btn-primary btn-sm" data-modal-open="send-notif-modal">+ Send Notification</button>
+          </div>
+          <table>
+            <thead><tr><th>Title</th><th>Type</th><th>Target</th><th>Date</th></tr></thead>
+            <tbody id="notif-tbody"><tr><td colspan="4" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal-backdrop" id="add-student-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Add New Student</div>
+      <button class="modal-close" data-modal-close="add-student-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-student-form">
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="s-name" required/></div>
+          <div class="form-group"><label class="form-label">Email *</label><input class="form-control" type="email" id="s-email" required/></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="s-phone"/></div>
+          <div class="form-group"><label class="form-label">Date of Birth</label><input class="form-control" type="date" id="s-dob"/></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group"><label class="form-label">Gender</label><select class="form-control" id="s-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div class="form-group"><label class="form-label">Semester</label><input class="form-control" type="number" id="s-semester" value="1" min="1" max="8"/></div>
+        </div>
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group"><label class="form-label">Department</label><select class="form-control" id="s-dept"><option value="">Select department</option></select></div>
+          <div class="form-group"><label class="form-label">Batch Year</label><input class="form-control" type="number" id="s-batch" value="2024"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Guardian Name</label><input class="form-control" id="s-guardian"/></div>
+          <div class="form-group"><label class="form-label">Guardian Phone</label><input class="form-control" id="s-gphone"/></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="add-student-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-student-btn">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Faculty Modal -->
+<div class="modal-backdrop" id="add-faculty-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Faculty Member</div>
+      <button class="modal-close" data-modal-close="add-faculty-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-faculty-form">
+        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Full Name *</label><input class="form-control" id="f-name" required/></div>
+        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Email *</label><input class="form-control" type="email" id="f-email" required/></div>
+        <div class="form-row" style="margin-bottom:14px">
+          <div class="form-group"><label class="form-label">Department</label><select class="form-control" id="f-dept"><option value="">Select</option></select></div>
+          <div class="form-group"><label class="form-label">Designation</label><input class="form-control" id="f-designation" placeholder="e.g. Professor"/></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Qualification</label><input class="form-control" id="f-qual" placeholder="e.g. PhD CSE"/></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="add-faculty-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-faculty-btn">Add Faculty</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send Notification Modal -->
+<div class="modal-backdrop" id="send-notif-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Send Notification</div>
+      <button class="modal-close" data-modal-close="send-notif-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Title</label><input class="form-control" id="n-title" placeholder="Notification title" required/></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Message</label><textarea class="form-control" id="n-message" rows="3" placeholder="Message content"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Type</label><select class="form-control" id="n-type"><option>Info</option><option>Warning</option><option>Exam</option><option>Fee</option><option>Event</option><option>Circular</option></select></div>
+        <div class="form-group"><label class="form-label">Target</label><select class="form-control" id="n-target"><option>All</option><option>Student</option><option>Faculty</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="send-notif-modal">Cancel</button>
+      <button class="btn btn-primary" id="send-notif-btn">Send Notification</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chatbot -->
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header">
+    <div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div>
+    <button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button>
+  </div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row">
+    <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/>
+    <button class="chatbot-send" id="chatbot-send">➤</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script src="js/charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin'])) return;
+  injectSidebar('Admin');
+  initSidebar();
+  initModals();
+
+  const user = Auth.getUser();
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  const titleEl = document.getElementById('welcome-title');
+  if (titleEl) titleEl.textContent = `Good ${greet}, ${user?.name?.split(' ')[0] || 'Admin'} 👋`;
+
+  // Load stats
+  try {
+    const [stuData, facData, feeData, libData] = await Promise.all([
+      API.get('/students/stats'),
+      API.get('/faculty/stats'),
+      API.get('/fees/stats'),
+      API.get('/library/books'),
+    ]);
+
+    if (stuData?.success) {
+      animateCounter(document.getElementById('stat-students'), stuData.data.total);
+      const nEl = document.getElementById('stat-students-new');
+      if (nEl) nEl.textContent = `+${stuData.data.newThisMonth} this month`;
+      // Dept doughnut
+      renderDoughnutChart('dept-chart',
+        stuData.data.byDept.map(d=>d.name),
+        stuData.data.byDept.map(d=>d.count),
+        'By Department'
+      );
+    }
+    if (facData?.success) animateCounter(document.getElementById('stat-faculty'), facData.data.total);
+    if (feeData?.success) {
+      const fc = document.getElementById('stat-fees-collected');
+      const fp = document.getElementById('stat-fees-pending');
+      if (fc) fc.textContent = fmt.currency(feeData.data.collected);
+      if (fp) fp.textContent = `${fmt.currency(feeData.data.pending)} pending`;
+      renderDoughnutChart('fee-chart',
+        ['Paid','Pending','Overdue'],
+        [feeData.data.paid_count||0, feeData.data.pending_count||0, feeData.data.overdue_count||0],
+        'Fee Status'
+      );
+    }
+    if (libData?.success) {
+      const total = libData.data.reduce((a,b)=>a+b.total_copies,0);
+      animateCounter(document.getElementById('stat-books'), total);
+    }
+
+    // Attendance analytics
+    const attData = await API.get('/attendance/analytics');
+    if (attData?.success) {
+      renderAttendanceChart('attendance-chart',
+        attData.data.monthly.map(m=>m.month),
+        attData.data.monthly.map(m=>m.present),
+        attData.data.monthly.map(m=>m.total - m.present)
+      );
+    }
+  } catch (e) { console.error(e); }
+
+  // Load students table
+  async function loadStudents(page = 1) {
+    const data = await API.get(`/students?page=${page}&limit=8`);
+    const tbody = document.getElementById('students-tbody');
+    if (!tbody) return;
+    if (!data?.success || !data.data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No students found</td></tr>'; return;
+    }
+    tbody.innerHTML = data.data.map(s => `
+      <tr>
+        <td class="td-primary">${s.student_id}</td>
+        <td>${s.name}</td>
+        <td>${s.dept_name || '—'}</td>
+        <td>Sem ${s.semester}</td>
+        <td class="td-muted">${s.email}</td>
+        <td><span class="badge badge-success">Active</span></td>
+        <td><a href="profile.html?id=${s.id}&role=student" class="btn btn-ghost btn-sm">View</a></td>
+      </tr>`).join('');
+
+    const info = document.getElementById('student-page-info');
+    if (info) info.textContent = `${(page-1)*8+1}–${Math.min(page*8, data.total)} of ${data.total}`;
+    initTableSearch('student-search', 'students-tbody');
+  }
+  loadStudents();
+
+  // Load faculty table
+  const facAll = await API.get('/faculty');
+  const ftbody = document.getElementById('faculty-tbody');
+  if (ftbody && facAll?.success) {
+    ftbody.innerHTML = facAll.data.map(f => `
+      <tr>
+        <td class="td-primary">${f.faculty_id}</td>
+        <td>${f.name}</td>
+        <td>${f.dept_name||'—'}</td>
+        <td>${f.designation||'—'}</td>
+        <td class="td-muted">${f.email}</td>
+        <td><button class="btn btn-ghost btn-sm">View</button></td>
+      </tr>`).join('');
+  }
+
+  // Load notifications
+  const notifAll = await API.get('/notifications');
+  const ntbody = document.getElementById('notif-tbody');
+  if (ntbody && notifAll?.success) {
+    ntbody.innerHTML = notifAll.data.slice(0,6).map(n => `
+      <tr>
+        <td class="td-primary">${n.title}</td>
+        <td><span class="badge badge-info">${n.type}</span></td>
+        <td>${n.target_role}</td>
+        <td class="td-muted">${fmt.date(n.created_at)}</td>
+      </tr>`).join('');
+  }
+
+  // Load department list into modals
+  const depts = await API.get('/departments');
+  if (depts?.success) {
+    const opts = depts.data.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    ['s-dept','f-dept'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML += opts; });
+  }
+
+  // Activity feed
+  const feed = document.getElementById('activity-feed');
+  if (feed && notifAll?.success) {
+    feed.innerHTML = notifAll.data.slice(0,5).map(n=>`
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div>
+          <div class="activity-text">${n.title}</div>
+          <div class="activity-time">${fmt.date(n.created_at)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Save student
+  document.getElementById('save-student-btn').addEventListener('click', async () => {
+    const data = await API.post('/students', {
+      name: document.getElementById('s-name').value,
+      email: document.getElementById('s-email').value,
+      phone: document.getElementById('s-phone').value,
+      dob: document.getElementById('s-dob').value,
+      gender: document.getElementById('s-gender').value,
+      semester: document.getElementById('s-semester').value,
+      department_id: document.getElementById('s-dept').value,
+      batch_year: document.getElementById('s-batch').value,
+      guardian_name: document.getElementById('s-guardian').value,
+      guardian_phone: document.getElementById('s-gphone').value,
+    });
+    if (data?.success) {
+      showToast('Student added!', data.student_id, 'success');
+      closeModal('add-student-modal');
+      loadStudents();
+    } else showToast('Error', data?.message, 'error');
+  });
+
+  // Save faculty
+  document.getElementById('save-faculty-btn').addEventListener('click', async () => {
+    const data = await API.post('/faculty', {
+      name: document.getElementById('f-name').value,
+      email: document.getElementById('f-email').value,
+      department_id: document.getElementById('f-dept').value,
+      designation: document.getElementById('f-designation').value,
+      qualification: document.getElementById('f-qual').value,
+    });
+    if (data?.success) {
+      showToast('Faculty added!', data.faculty_id, 'success');
+      closeModal('add-faculty-modal');
+    } else showToast('Error', data?.message, 'error');
+  });
+
+  // Send notification
+  document.getElementById('send-notif-btn').addEventListener('click', async () => {
+    const data = await API.post('/notifications', {
+      title: document.getElementById('n-title').value,
+      message: document.getElementById('n-message').value,
+      type: document.getElementById('n-type').value,
+      target_role: document.getElementById('n-target').value,
+    });
+    if (data?.success) { showToast('Notification sent!', '', 'success'); closeModal('send-notif-modal'); }
+    else showToast('Error', data?.message, 'error');
+  });
+});
+</script>
+</body>
+</html>

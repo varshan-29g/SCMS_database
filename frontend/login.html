@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login — SCMS</title>
+<meta name="description" content="Login to Smart Campus Management System"/>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+<style>
+  .password-wrap { position:relative; }
+  .password-wrap .form-control { padding-right: 44px; }
+  .pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem; }
+</style>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div id="page-overlay"></div>
+
+<div class="auth-page">
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="auth-left-logo">SC<span>M</span>S</div>
+      <p class="auth-left-desc">The next-generation Smart Campus Management System — unified, intelligent, and production-ready.</p>
+      <div class="auth-features">
+        <div class="auth-feature"><span class="auth-feature-icon">🔐</span> JWT-secured role-based access</div>
+        <div class="auth-feature"><span class="auth-feature-icon">📊</span> Real-time analytics dashboard</div>
+        <div class="auth-feature"><span class="auth-feature-icon">🔔</span> Live Socket.io notifications</div>
+        <div class="auth-feature"><span class="auth-feature-icon">📱</span> Fully responsive design</div>
+        <div class="auth-feature"><span class="auth-feature-icon">🤖</span> AI chatbot assistant</div>
+      </div>
+      <div style="margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.08)">
+        <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin-bottom:10px">Demo Credentials</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px">
+            <p style="color:rgba(255,255,255,0.8);font-size:0.78rem;font-weight:600">Admin</p>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.72rem">admin@scms.edu / Admin@123</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px">
+            <p style="color:rgba(255,255,255,0.8);font-size:0.78rem;font-weight:600">Student</p>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.72rem">arjun@student.scms.edu / Student@123</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px">
+            <p style="color:rgba(255,255,255,0.8);font-size:0.78rem;font-weight:600">Faculty</p>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.72rem">ramesh@scms.edu / Faculty@123</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <!-- Login Tab -->
+      <div id="login-tab">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your SCMS account</p>
+        <form class="auth-form" id="login-form">
+          <div>
+            <p class="form-label" style="margin-bottom:8px">Select your role</p>
+            <div class="role-selector">
+              <button type="button" class="role-btn active" data-role="Admin">Admin</button>
+              <button type="button" class="role-btn" data-role="Student">Student</button>
+              <button type="button" class="role-btn" data-role="Faculty">Faculty</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email address</label>
+            <input class="form-control" type="email" id="login-email" placeholder="you@scms.edu" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <div class="password-wrap">
+              <input class="form-control" type="password" id="login-password" placeholder="Enter your password" required/>
+              <button type="button" class="pw-toggle" id="pw-toggle-login">👁</button>
+            </div>
+          </div>
+          <div id="login-error" style="color:var(--danger);font-size:0.8rem;display:none"></div>
+          <button type="submit" class="btn btn-primary" id="login-btn" style="width:100%;height:46px;font-size:0.95rem;margin-top:4px">
+            Sign In
+          </button>
+        </form>
+        <p class="auth-switch" style="margin-top:20px">
+          Don't have an account? <a href="#" id="go-register">Register here</a>
+        </p>
+      </div>
+
+      <!-- Register Tab -->
+      <div id="register-tab" style="display:none">
+        <h1 class="auth-title">Create account</h1>
+        <p class="auth-subtitle">Register as Student or Faculty</p>
+        <form class="auth-form" id="register-form">
+          <div>
+            <div class="role-selector">
+              <button type="button" class="role-btn active" data-role="Student" id="reg-role-student">Student</button>
+              <button type="button" class="role-btn" data-role="Faculty" id="reg-role-faculty">Faculty</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input class="form-control" type="text" id="reg-name" placeholder="Full name" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input class="form-control" type="tel" id="reg-phone" placeholder="+91 XXXXXXXXXX"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <input class="form-control" type="email" id="reg-email" placeholder="you@scms.edu" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-wrap">
+              <input class="form-control" type="password" id="reg-password" placeholder="Min 8 characters" required/>
+              <button type="button" class="pw-toggle" id="pw-toggle-reg">👁</button>
+            </div>
+          </div>
+          <div id="reg-error" style="color:var(--danger);font-size:0.8rem;display:none"></div>
+          <button type="submit" class="btn btn-primary" id="register-btn" style="width:100%;height:46px;font-size:0.95rem">
+            Create Account
+          </button>
+        </form>
+        <p class="auth-switch" style="margin-top:20px">
+          Already have an account? <a href="#" id="go-login">Sign in</a>
+        </p>
+      </div>
+
+      <div style="margin-top:24px;text-align:center">
+        <button id="theme-toggle" class="btn btn-ghost btn-sm">🌙 Toggle Theme</button>
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:8px">← Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/three-bg.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Redirect if already logged in
+  if (Auth.isLoggedIn()) {
+    const role = Auth.getRole();
+    window.location.href = role === 'Admin' ? 'admin-dashboard.html'
+      : role === 'Student' ? 'student-dashboard.html' : 'faculty-dashboard.html';
+    return;
+  }
+
+  // Check URL for tab
+  if (new URLSearchParams(location.search).get('tab') === 'register') {
+    showRegister();
+  }
+
+  let selectedRole = 'Admin';
+  let regRole = 'Student';
+
+  // Role selection (login)
+  document.querySelectorAll('#login-form .role-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#login-form .role-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRole = btn.dataset.role;
+    });
+  });
+
+  // Role selection (register)
+  document.querySelectorAll('#register-form .role-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#register-form .role-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      regRole = btn.dataset.role;
+    });
+  });
+
+  // Tab switching
+  function showLogin()    { document.getElementById('login-tab').style.display=''; document.getElementById('register-tab').style.display='none'; }
+  function showRegister() { document.getElementById('login-tab').style.display='none'; document.getElementById('register-tab').style.display=''; }
+  document.getElementById('go-register').addEventListener('click', e => { e.preventDefault(); showRegister(); });
+  document.getElementById('go-login').addEventListener('click',    e => { e.preventDefault(); showLogin(); });
+
+  // Password toggle
+  function setupPwToggle(inputId, toggleId) {
+    document.getElementById(toggleId).addEventListener('click', () => {
+      const inp = document.getElementById(inputId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+  }
+  setupPwToggle('login-password', 'pw-toggle-login');
+  setupPwToggle('reg-password', 'pw-toggle-reg');
+
+  // LOGIN submit
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    errEl.style.display = 'none';
+    try {
+      const data = await API.post('/auth/login', {
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value,
+        role: selectedRole
+      });
+      if (data && data.success) {
+        Auth.setSession(data.token, data.user, data.role);
+        showToast('Login successful', `Welcome back, ${data.user.name}!`, 'success');
+        setTimeout(() => {
+          const dest = data.role === 'Admin' ? 'admin-dashboard.html'
+            : data.role === 'Student' ? 'student-dashboard.html' : 'faculty-dashboard.html';
+          window.location.href = dest;
+        }, 800);
+      } else {
+        errEl.textContent = data?.message || 'Invalid credentials.';
+        errEl.style.display = 'block';
+      }
+    } catch (err) {
+      errEl.textContent = 'Connection error. Ensure backend is running on port 5000.';
+      errEl.style.display = 'block';
+    }
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+  });
+
+  // REGISTER submit
+  document.getElementById('register-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('register-btn');
+    const errEl = document.getElementById('reg-error');
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    errEl.style.display = 'none';
+    try {
+      const data = await API.post('/auth/register', {
+        name:     document.getElementById('reg-name').value,
+        email:    document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
+        phone:    document.getElementById('reg-phone').value,
+        role:     regRole,
+      });
+      if (data && data.success) {
+        showToast('Account created!', 'You can now log in.', 'success');
+        showLogin();
+      } else {
+        errEl.textContent = data?.message || 'Registration failed.';
+        errEl.style.display = 'block';
+      }
+    } catch {
+      errEl.textContent = 'Connection error.';
+      errEl.style.display = 'block';
+    }
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+  });
+});
+</script>
+</body>
+</html>

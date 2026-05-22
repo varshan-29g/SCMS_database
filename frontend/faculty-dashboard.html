@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Faculty Dashboard — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div id="page-overlay"></div>
+<div id="loading-screen">
+  <div class="loading-logo">SCMS<span>.</span></div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <header class="page-header">
+      <button class="header-toggle" id="sidebar-toggle">☰</button>
+      <div class="header-title">Faculty Dashboard</div>
+      <div class="header-actions">
+        <button class="header-btn" id="theme-toggle">🌙</button>
+        <a href="notifications.html" class="header-btn">🔔</a>
+        <a href="profile.html" class="header-btn">👤</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <h1 class="page-title" id="welcome-title">Welcome, Faculty 👋</h1>
+      <p class="page-subtitle">Manage your classes, attendance, and submissions.</p>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="quick-action" data-modal-open="mark-att-modal">✅ Mark Attendance</div>
+        <div class="quick-action" data-modal-open="leave-modal">📋 Apply Leave</div>
+        <div class="quick-action" data-modal-open="schedule-exam-modal">📝 Schedule Exam</div>
+        <a href="attendance.html" class="quick-action">📊 Attendance Report</a>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card animate-fade-up">
+          <div class="stat-icon">📖</div>
+          <div class="stat-value" id="stat-subjects">—</div>
+          <div class="stat-label">Subjects Assigned</div>
+          <div class="stat-change up">This semester</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-1">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value" id="stat-exams">—</div>
+          <div class="stat-label">Exams Scheduled</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-2">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-value" id="stat-leaves">—</div>
+          <div class="stat-label">Leave Requests</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-3">
+          <div class="stat-icon">🔔</div>
+          <div class="stat-value" id="stat-notifs">—</div>
+          <div class="stat-label">Notifications</div>
+        </div>
+      </div>
+
+      <!-- My Subjects + Timetable -->
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">My Subjects</div>
+          </div>
+          <table style="width:100%">
+            <thead><tr>
+              <th style="padding:10px 0;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">Subject</th>
+              <th style="padding:10px 0;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase">Code</th>
+              <th style="padding:10px 0;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase">Type</th>
+              <th style="padding:10px 0;font-size:0.72rem;color:var(--text-muted);text-transform:uppercase">Credits</th>
+            </tr></thead>
+            <tbody id="subjects-tbody"><tr><td colspan="4" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Today's Schedule</div></div>
+          <div id="today-schedule" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+
+      <!-- Leave Requests -->
+      <div id="leaves" style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">My Leave Requests</div>
+            <button class="btn btn-primary btn-sm" data-modal-open="leave-modal">+ Apply Leave</button>
+          </div>
+          <table>
+            <thead><tr><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Status</th></tr></thead>
+            <tbody id="leave-tbody"><tr><td colspan="5" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Exams I manage -->
+      <div id="exams" style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">My Exams</div>
+            <button class="btn btn-primary btn-sm" data-modal-open="schedule-exam-modal">+ Schedule Exam</button>
+          </div>
+          <table>
+            <thead><tr><th>Exam Name</th><th>Subject</th><th>Date</th><th>Time</th><th>Hall</th><th>Max Marks</th></tr></thead>
+            <tbody id="exams-tbody"><tr><td colspan="6" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mark Attendance Modal -->
+<div class="modal-backdrop" id="mark-att-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Mark Attendance</div>
+      <button class="modal-close" data-modal-close="mark-att-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Subject</label>
+        <select class="form-control" id="att-subject-select"></select>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Date</label>
+        <input class="form-control" type="date" id="att-date" value=""/>
+      </div>
+      <div id="att-students-list" style="margin-top:16px;font-size:0.85rem;color:var(--text-muted)">
+        Select a subject to load students.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="mark-att-modal">Cancel</button>
+      <button class="btn btn-primary" id="submit-att-btn">Submit Attendance</button>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Leave Modal -->
+<div class="modal-backdrop" id="leave-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Apply for Leave</div>
+      <button class="modal-close" data-modal-close="leave-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Leave Type</label>
+        <select class="form-control" id="leave-type"><option>Sick</option><option>Casual</option><option>Earned</option><option>Maternity</option><option>Others</option></select>
+      </div>
+      <div class="form-row" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">From Date</label><input class="form-control" type="date" id="leave-from"/></div>
+        <div class="form-group"><label class="form-label">To Date</label><input class="form-control" type="date" id="leave-to"/></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <textarea class="form-control" id="leave-reason" rows="3" placeholder="Brief reason for leave"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="leave-modal">Cancel</button>
+      <button class="btn btn-primary" id="submit-leave-btn">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Exam Modal -->
+<div class="modal-backdrop" id="schedule-exam-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Schedule Exam</div>
+      <button class="modal-close" data-modal-close="schedule-exam-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Exam Name</label><input class="form-control" id="exam-name" placeholder="e.g. Mid Semester Exam"/></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Subject</label><select class="form-control" id="exam-subject-select"></select></div>
+      <div class="form-row" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Date</label><input class="form-control" type="date" id="exam-date"/></div>
+        <div class="form-group"><label class="form-label">Hall</label><input class="form-control" id="exam-hall" placeholder="Hall A"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Start Time</label><input class="form-control" type="time" id="exam-start" value="09:00"/></div>
+        <div class="form-group"><label class="form-label">End Time</label><input class="form-control" type="time" id="exam-end" value="12:00"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="schedule-exam-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-exam-btn">Schedule</button>
+    </div>
+  </div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header">
+    <div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div>
+    <button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button>
+  </div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row">
+    <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/>
+    <button class="chatbot-send" id="chatbot-send">➤</button>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script src="js/charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Faculty'])) return;
+  injectSidebar('Faculty');
+  initSidebar();
+  initModals();
+
+  const user = Auth.getUser();
+  const hour = new Date().getHours();
+  document.getElementById('welcome-title').textContent =
+    `Good ${hour<12?'morning':hour<17?'afternoon':'evening'}, ${user?.name?.split(' ')[0]||'Faculty'} 👋`;
+
+  // Set default date
+  document.getElementById('att-date').value = new Date().toISOString().slice(0,10);
+
+  try {
+    // Subjects
+    const subData = await API.get(`/faculty/${user.id}/subjects`);
+    const stbody = document.getElementById('subjects-tbody');
+    if (stbody && subData?.success) {
+      document.getElementById('stat-subjects').textContent = subData.data.length;
+      stbody.innerHTML = subData.data.length
+        ? subData.data.map(s=>`<tr>
+            <td class="td-primary" style="padding:10px 0">${s.name}</td>
+            <td style="padding:10px 0">${s.code}</td>
+            <td style="padding:10px 0"><span class="badge badge-info">${s.type}</span></td>
+            <td style="padding:10px 0">${s.credits}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="4" class="table-empty">No subjects assigned</td></tr>';
+
+      // Populate subject selects
+      const opts = subData.data.map(s=>`<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+      document.getElementById('att-subject-select').innerHTML = opts;
+      document.getElementById('exam-subject-select').innerHTML = opts;
+    }
+
+    // Timetable today
+    const ttData = await API.get(`/timetable/faculty/${user.id}`);
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const today = days[new Date().getDay()];
+    const schedEl = document.getElementById('today-schedule');
+    if (schedEl && ttData?.success) {
+      const todayClasses = ttData.data.filter(t=>t.day_of_week===today);
+      schedEl.innerHTML = todayClasses.length
+        ? todayClasses.map(t=>`
+          <div style="background:var(--bg-secondary);border-radius:8px;padding:12px 14px;border-left:3px solid var(--text-primary)">
+            <div style="font-weight:600;font-size:0.875rem">${t.subject_name}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">${t.start_time} – ${t.end_time} · ${t.room||'TBD'}</div>
+          </div>`).join('')
+        : '<div style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:24px">No classes today 🎉</div>';
+    }
+
+    // Leave requests
+    const leaves = await API.get('/faculty/leave/all');
+    const ltbody = document.getElementById('leave-tbody');
+    if (ltbody && leaves?.success) {
+      const myLeaves = leaves.data.filter(l=>l.faculty_id===user.id);
+      document.getElementById('stat-leaves').textContent = myLeaves.length;
+      ltbody.innerHTML = myLeaves.length
+        ? myLeaves.map(l=>`<tr>
+            <td>${l.leave_type}</td>
+            <td>${fmt.date(l.from_date)}</td>
+            <td>${fmt.date(l.to_date)}</td>
+            <td class="td-muted">${l.reason||'—'}</td>
+            <td><span class="badge ${l.status==='Approved'?'badge-success':l.status==='Rejected'?'badge-danger':'badge-warning'}">${l.status}</span></td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" class="table-empty">No leave requests</td></tr>';
+    }
+
+    // Exams
+    const exData = await API.get('/exams');
+    const etbody = document.getElementById('exams-tbody');
+    if (etbody && exData?.success) {
+      document.getElementById('stat-exams').textContent = exData.data.length;
+      etbody.innerHTML = exData.data.slice(0,8).map(e=>`<tr>
+        <td class="td-primary">${e.name}</td>
+        <td>${e.subject_name||'—'}</td>
+        <td>${fmt.date(e.exam_date)}</td>
+        <td class="td-muted">${e.start_time||'—'}</td>
+        <td>${e.hall||'—'}</td>
+        <td>${e.max_marks}</td>
+      </tr>`).join('');
+    }
+
+    // Notifications count
+    const notifData = await API.get('/notifications/unread');
+    if (notifData?.success) document.getElementById('stat-notifs').textContent = notifData.count;
+
+  } catch(e) { console.error(e); }
+
+  // Submit leave
+  document.getElementById('submit-leave-btn').addEventListener('click', async () => {
+    const data = await API.post('/faculty/leave', {
+      leave_type: document.getElementById('leave-type').value,
+      from_date: document.getElementById('leave-from').value,
+      to_date: document.getElementById('leave-to').value,
+      reason: document.getElementById('leave-reason').value,
+    });
+    if (data?.success) { showToast('Leave request submitted!','','success'); closeModal('leave-modal'); }
+    else showToast('Error', data?.message, 'error');
+  });
+
+  // Schedule exam
+  document.getElementById('save-exam-btn').addEventListener('click', async () => {
+    const data = await API.post('/exams', {
+      name: document.getElementById('exam-name').value,
+      subject_id: document.getElementById('exam-subject-select').value,
+      exam_date: document.getElementById('exam-date').value,
+      hall: document.getElementById('exam-hall').value,
+      start_time: document.getElementById('exam-start').value,
+      end_time: document.getElementById('exam-end').value,
+    });
+    if (data?.success) { showToast('Exam scheduled!','','success'); closeModal('schedule-exam-modal'); }
+    else showToast('Error', data?.message, 'error');
+  });
+});
+</script>
+</body>
+</html>

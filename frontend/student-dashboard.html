@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Dashboard — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div id="page-overlay"></div>
+<div id="loading-screen">
+  <div class="loading-logo">SCMS<span>.</span></div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+</div>
+
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <header class="page-header">
+      <button class="header-toggle" id="sidebar-toggle">☰</button>
+      <div class="header-title">Student Dashboard</div>
+      <div class="header-actions">
+        <button class="header-btn" id="theme-toggle">🌙</button>
+        <a href="notifications.html" class="header-btn">🔔</a>
+        <a href="profile.html" class="header-btn">👤</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <h1 class="page-title" id="welcome-title">Welcome back, Student 👋</h1>
+      <p class="page-subtitle">Your academic overview at a glance.</p>
+
+      <!-- Stat cards -->
+      <div class="stats-row">
+        <div class="stat-card animate-fade-up">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="stat-att">—%</div>
+          <div class="stat-label">Overall Attendance</div>
+          <div class="stat-change" id="stat-att-status">—</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-1">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value" id="stat-cgpa">—</div>
+          <div class="stat-label">Average Grade</div>
+          <div class="stat-change up">Current semester</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-2">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value" id="stat-fee-status">—</div>
+          <div class="stat-label">Fee Status</div>
+          <div class="stat-change" id="stat-fee-due">—</div>
+        </div>
+        <div class="stat-card animate-fade-up anim-delay-3">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="stat-books">—</div>
+          <div class="stat-label">Books Issued</div>
+          <div class="stat-change">Library records</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Attendance by Subject</div>
+          </div>
+          <div class="chart-container"><canvas id="att-subject-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Upcoming Exams</div></div>
+          <div id="upcoming-exams" style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+            <div class="skeleton skeleton-text" style="width:90%"></div>
+            <div class="skeleton skeleton-text" style="width:75%"></div>
+            <div class="skeleton skeleton-text" style="width:80%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Subject Summary -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <div class="card-title">Subject-wise Attendance</div>
+          <a href="attendance.html" style="font-size:0.8rem;color:var(--text-muted)">View details →</a>
+        </div>
+        <div id="att-subjects-list"></div>
+      </div>
+
+      <!-- Recent Results -->
+      <div id="exams" style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar"><div class="card-title">My Results</div></div>
+          <table>
+            <thead><tr><th>Exam</th><th>Subject</th><th>Date</th><th>Marks</th><th>Grade</th><th>Remarks</th></tr></thead>
+            <tbody id="results-tbody"><tr><td colspan="6" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Fee History -->
+      <div style="margin-top:24px">
+        <div class="table-wrapper">
+          <div class="table-toolbar">
+            <div class="card-title">Fee History</div>
+            <a href="fee-management.html" class="btn btn-ghost btn-sm">View All</a>
+          </div>
+          <table>
+            <thead><tr><th>Fee Type</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Receipt</th></tr></thead>
+            <tbody id="fee-tbody"><tr><td colspan="5" class="table-empty">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header">
+    <div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div>
+    <button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button>
+  </div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row">
+    <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/>
+    <button class="chatbot-send" id="chatbot-send">➤</button>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script src="js/charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Student'])) return;
+  injectSidebar('Student');
+  initSidebar();
+
+  const user = Auth.getUser();
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  document.getElementById('welcome-title').textContent = `Good ${greet}, ${user?.name?.split(' ')[0] || 'Student'} 👋`;
+
+  try {
+    // Attendance
+    const attData = await API.get(`/attendance/student/${user.id}`);
+    if (attData?.success && attData.data.length) {
+      const avgPct = attData.data.reduce((a,b)=>a+parseFloat(b.percentage),0) / attData.data.length;
+      const pctEl = document.getElementById('stat-att');
+      if (pctEl) pctEl.textContent = avgPct.toFixed(1)+'%';
+      const statusEl = document.getElementById('stat-att-status');
+      if (statusEl) {
+        statusEl.textContent = avgPct >= 75 ? '✓ Eligible' : '⚠ Below 75%';
+        statusEl.className = `stat-change ${avgPct >= 75 ? 'up' : 'down'}`;
+      }
+      // Chart
+      renderHBarChart('att-subject-chart',
+        attData.data.map(d=>d.subject_code||d.subject_name.slice(0,8)),
+        attData.data.map(d=>parseFloat(d.percentage)),
+        'Attendance %'
+      );
+      // Subject list
+      const list = document.getElementById('att-subjects-list');
+      if (list) {
+        list.innerHTML = attData.data.map(d=>`
+          <div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px">
+            <div style="flex:1">
+              <div style="font-weight:500;font-size:0.875rem">${d.subject_name}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">${d.present}/${d.total} classes</div>
+            </div>
+            <div style="width:120px"><div class="progress-bar"><div class="progress-fill ${parseFloat(d.percentage)>=75?'success':parseFloat(d.percentage)>=60?'warning':'danger'}" style="width:${d.percentage}%"></div></div></div>
+            <div style="font-weight:600;font-size:0.875rem;min-width:40px;text-align:right;color:${parseFloat(d.percentage)>=75?'var(--success)':parseFloat(d.percentage)>=60?'var(--warning)':'var(--danger)'}">${d.percentage}%</div>
+          </div>`).join('');
+      }
+    }
+
+    // Upcoming exams
+    const exData = await API.get('/exams/upcoming');
+    const exEl = document.getElementById('upcoming-exams');
+    if (exEl && exData?.success) {
+      exEl.innerHTML = exData.data.length
+        ? exData.data.slice(0,5).map(e=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div>
+              <div style="font-weight:500;font-size:0.875rem">${e.name}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">${e.subject_name} · ${e.hall}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:0.8rem;font-weight:600">${fmt.date(e.exam_date)}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)">${e.start_time}</div>
+            </div>
+          </div>`).join('')
+        : '<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-desc">No upcoming exams</div></div>';
+    }
+
+    // Results
+    const resData = await API.get(`/exams/results/student/${user.id}`);
+    const rtbody = document.getElementById('results-tbody');
+    if (rtbody && resData?.success) {
+      rtbody.innerHTML = resData.data.length
+        ? resData.data.map(r=>`
+          <tr>
+            <td class="td-primary">${r.exam_name}</td>
+            <td>${r.subject_name}</td>
+            <td class="td-muted">${fmt.date(r.exam_date)}</td>
+            <td>${r.marks}/${r.max_marks}</td>
+            <td><span class="badge ${r.grade==='F'?'badge-danger':r.grade==='O'||r.grade==='A+'?'badge-success':'badge-info'}">${r.grade}</span></td>
+            <td class="td-muted">${r.remarks||'—'}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="6" class="table-empty">No results yet</td></tr>';
+    }
+
+    // Fees
+    const feeData = await API.get(`/fees/student/${user.id}`);
+    const ftbody = document.getElementById('fee-tbody');
+    if (ftbody && feeData?.success) {
+      const pending = feeData.data.filter(f=>f.status==='Pending'||f.status==='Overdue').length;
+      document.getElementById('stat-fee-status').textContent = pending ? `${pending} Pending` : 'All Clear';
+      document.getElementById('stat-fee-due').className = `stat-change ${pending?'down':'up'}`;
+      ftbody.innerHTML = feeData.data.length
+        ? feeData.data.map(f=>`
+          <tr>
+            <td class="td-primary">${f.fee_type}</td>
+            <td>${fmt.currency(f.amount)}</td>
+            <td class="td-muted">${fmt.date(f.due_date)}</td>
+            <td><span class="badge ${f.status==='Paid'?'badge-success':f.status==='Overdue'?'badge-danger':'badge-warning'}">${f.status}</span></td>
+            <td class="td-muted">${f.receipt_no||'—'}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" class="table-empty">No fee records</td></tr>';
+    }
+
+    // Library
+    const libData = await API.get(`/library/history/${user.id}`);
+    if (libData?.success) {
+      const active = libData.data.filter(b=>b.status==='Issued').length;
+      document.getElementById('stat-books').textContent = active;
+    }
+  } catch(e) { console.error(e); }
+});
+</script>
+</body>
+</html>

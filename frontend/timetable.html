@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Timetable — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+<style>
+.tt-grid { display:grid; grid-template-columns: 80px repeat(6,1fr); gap:2px; background:var(--border); border-radius:var(--radius-md); overflow:hidden; font-size:0.78rem; }
+.tt-head { background:var(--bg-secondary); padding:10px 6px; text-align:center; font-weight:600; font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+.tt-time { background:var(--bg-secondary); padding:10px 6px; text-align:center; font-size:0.72rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; }
+.tt-cell { background:var(--bg-primary); padding:6px; min-height:66px; }
+.tt-entry { background:var(--bg-secondary); border:1px solid var(--border); border-left:3px solid var(--text-primary); border-radius:4px; padding:6px 8px; cursor:pointer; transition:all var(--transition); }
+.tt-entry:hover { background:var(--text-primary); color:var(--bg-primary); }
+.tt-entry-sub { font-weight:600; font-size:0.78rem; }
+.tt-entry-info { font-size:0.68rem; color:var(--text-muted); margin-top:2px; }
+.tt-entry:hover .tt-entry-info { color:rgba(255,255,255,0.6); }
+</style>
+</head>
+<body>
+<canvas id="three-canvas"></canvas><div id="page-overlay"></div>
+<div id="loading-screen"><div class="loading-logo">SCMS<span>.</span></div><div class="loading-bar-wrap"><div class="loading-bar"></div></div></div>
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+<div class="main-content">
+<header class="page-header">
+  <button class="header-toggle" id="sidebar-toggle">☰</button>
+  <div class="header-title">Timetable</div>
+  <div class="header-actions">
+    <button class="header-btn" id="theme-toggle">🌙</button>
+    <a href="notifications.html" class="header-btn">🔔</a>
+  </div>
+</header>
+<div class="page-body">
+  <h1 class="page-title">Timetable</h1>
+  <p class="page-subtitle">Weekly class schedule organized by day and time.</p>
+
+  <!-- Filters -->
+  <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap" id="tt-filters">
+    <select class="form-control" id="dept-filter" style="height:38px;width:200px;font-size:0.875rem">
+      <option value="">All Departments</option>
+    </select>
+    <select class="form-control" id="sem-filter" style="height:38px;width:140px;font-size:0.875rem">
+      <option value="">All Semesters</option>
+      <option value="1">Semester 1</option><option value="2">Semester 2</option>
+      <option value="3">Semester 3</option><option value="4">Semester 4</option>
+      <option value="5">Semester 5</option><option value="6">Semester 6</option>
+      <option value="7">Semester 7</option><option value="8">Semester 8</option>
+    </select>
+    <button class="btn btn-secondary" id="load-tt-btn">Load Timetable</button>
+    <button class="btn btn-primary" id="add-tt-btn" style="display:none" data-modal-open="add-tt-modal">+ Add Entry</button>
+  </div>
+
+  <!-- Timetable Grid -->
+  <div class="card" style="padding:16px;overflow-x:auto">
+    <div class="tt-grid" id="timetable-grid">
+      <!-- Built dynamically -->
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap">
+    <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:6px">
+      <div style="width:12px;height:12px;background:var(--text-primary);border-radius:2px"></div> Class scheduled
+    </div>
+    <div style="font-size:0.78rem;color:var(--text-muted)">Click an entry to view details</div>
+  </div>
+
+  <!-- Today's Classes card -->
+  <div class="card" style="margin-top:24px">
+    <div class="card-header"><div class="card-title">Today's Classes</div><div class="card-subtitle" id="today-day-label"></div></div>
+    <div id="today-classes" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Add Timetable Entry Modal -->
+<div class="modal-backdrop" id="add-tt-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add Timetable Entry</div><button class="modal-close" data-modal-close="add-tt-modal">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Subject</label><select class="form-control" id="tt-subject"></select></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Faculty</label><select class="form-control" id="tt-faculty"></select></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Day</label>
+        <select class="form-control" id="tt-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select>
+      </div>
+      <div class="form-row" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Start Time</label><input class="form-control" type="time" id="tt-start" value="09:00"/></div>
+        <div class="form-group"><label class="form-label">End Time</label><input class="form-control" type="time" id="tt-end" value="10:00"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Room</label><input class="form-control" id="tt-room" placeholder="e.g. Room 201"/></div>
+        <div class="form-group"><label class="form-label">Semester</label><input class="form-control" type="number" id="tt-sem" value="3" min="1" max="8"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="add-tt-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-tt-btn">Add Entry</button>
+    </div>
+  </div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header"><div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div><button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button></div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row"><input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/><button class="chatbot-send" id="chatbot-send">➤</button></div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const TIME_SLOTS = ['08:00–09:00','09:00–10:00','10:00–11:00','11:00–12:00','12:00–13:00','13:00–14:00','14:00–15:00','15:00–16:00','16:00–17:00'];
+
+function buildGrid(entries) {
+  const grid = document.getElementById('timetable-grid');
+  // Map: day -> timeSlot -> entry
+  const map = {};
+  DAYS.forEach(d => { map[d] = {}; });
+  entries.forEach(e => {
+    const startH = parseInt(e.start_time?.split(':')[0]||9);
+    const slot = `${String(startH).padStart(2,'0')}:00–${String(startH+1).padStart(2,'0')}:00`;
+    if (!map[e.day_of_week]) map[e.day_of_week] = {};
+    map[e.day_of_week][slot] = e;
+  });
+
+  let html = '<div class="tt-head"></div>';
+  DAYS.forEach(d => html += `<div class="tt-head">${d.slice(0,3)}</div>`);
+
+  TIME_SLOTS.forEach(slot => {
+    html += `<div class="tt-time">${slot.split('–')[0]}</div>`;
+    DAYS.forEach(d => {
+      const e = map[d]?.[slot];
+      html += `<div class="tt-cell">${e ? `<div class="tt-entry" title="${e.subject_name}">
+        <div class="tt-entry-sub">${(e.subject_code||e.subject_name||'').slice(0,8)}</div>
+        <div class="tt-entry-info">${e.faculty_name||''}</div>
+        <div class="tt-entry-info">${e.room||''}</div>
+      </div>` : ''}</div>`;
+    });
+  });
+
+  grid.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin','Student','Faculty'])) return;
+  const role = Auth.getRole();
+  const user = Auth.getUser();
+  injectSidebar(role);
+  initSidebar(); initModals();
+
+  if (role === 'Admin') document.getElementById('add-tt-btn').style.display = '';
+
+  // Today label
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const todayName = days[new Date().getDay()];
+  document.getElementById('today-day-label').textContent = todayName;
+
+  // Load departments
+  const deptData = await API.get('/departments');
+  if (deptData?.success) {
+    const opts = deptData.data.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    document.getElementById('dept-filter').innerHTML += opts;
+  }
+
+  async function loadTimetable() {
+    const deptId = document.getElementById('dept-filter').value;
+    const sem    = document.getElementById('sem-filter').value;
+
+    let ep = '/timetable';
+    if (role === 'Student') ep = `/timetable/student/${user.id}`;
+    else if (role === 'Faculty') ep = `/timetable/faculty/${user.id}`;
+    else if (deptId) ep = `/timetable/department/${deptId}${sem?'?semester='+sem:''}`;
+
+    const data = await API.get(ep);
+    if (!data?.success) return;
+    buildGrid(data.data);
+
+    // Today's classes
+    const todayClasses = data.data.filter(e=>e.day_of_week===todayName);
+    const todayEl = document.getElementById('today-classes');
+    todayEl.innerHTML = todayClasses.length
+      ? todayClasses.sort((a,b)=>a.start_time?.localeCompare(b.start_time)).map(e=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-sm);border-left:3px solid var(--text-primary)">
+            <div>
+              <div style="font-weight:600;font-size:0.875rem">${e.subject_name}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">${e.faculty_name||''} · ${e.room||'TBD'}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:600;font-size:0.85rem">${e.start_time||''}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)">→ ${e.end_time||''}</div>
+            </div>
+          </div>`).join('')
+      : '<div style="color:var(--text-muted);text-align:center;padding:24px">No classes scheduled today 🎉</div>';
+  }
+
+  loadTimetable();
+  document.getElementById('load-tt-btn').addEventListener('click', loadTimetable);
+
+  // Populate add-entry modal
+  if (role === 'Admin') {
+    const subData = await API.get('/courses');
+    if (subData?.success) {
+      // Load subjects from all courses
+      const allSubs = await API.get('/attendance?limit=1');
+    }
+    const facData = await API.get('/faculty');
+    if (facData?.success) {
+      document.getElementById('tt-faculty').innerHTML = facData.data.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+    }
+  }
+
+  document.getElementById('save-tt-btn')?.addEventListener('click', async () => {
+    const deptId = document.getElementById('dept-filter').value;
+    const data = await API.post('/timetable', {
+      subject_id:    document.getElementById('tt-subject').value,
+      faculty_id:    document.getElementById('tt-faculty').value,
+      day_of_week:   document.getElementById('tt-day').value,
+      start_time:    document.getElementById('tt-start').value,
+      end_time:      document.getElementById('tt-end').value,
+      room:          document.getElementById('tt-room').value,
+      semester:      document.getElementById('tt-sem').value,
+      department_id: deptId || null,
+    });
+    if (data?.success) { showToast('Entry added!','','success'); closeModal('add-tt-modal'); loadTimetable(); }
+    else showToast('Error', data?.message, 'error');
+  });
+});
+</script>
+</body>
+</html>

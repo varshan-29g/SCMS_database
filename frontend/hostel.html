@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Hostel — SCMS</title>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+</head>
+<body>
+<canvas id="three-canvas"></canvas><div id="page-overlay"></div>
+<div id="loading-screen"><div class="loading-logo">SCMS<span>.</span></div><div class="loading-bar-wrap"><div class="loading-bar"></div></div></div>
+<div id="sidebar-wrapper"></div>
+
+<div class="app-layout">
+<div class="main-content">
+<header class="page-header">
+  <button class="header-toggle" id="sidebar-toggle">☰</button>
+  <div class="header-title">Hostel Management</div>
+  <div class="header-actions">
+    <button class="header-btn" id="theme-toggle">🌙</button>
+    <a href="notifications.html" class="header-btn">🔔</a>
+  </div>
+</header>
+<div class="page-body">
+  <h1 class="page-title">Hostel Management</h1>
+  <p class="page-subtitle">Room allocation, occupancy tracking, and hostel administration.</p>
+
+  <div class="stats-row">
+    <div class="stat-card animate-fade-up"><div class="stat-icon">🏠</div><div class="stat-value" id="h-rooms">—</div><div class="stat-label">Total Rooms</div></div>
+    <div class="stat-card animate-fade-up anim-delay-1"><div class="stat-icon">✅</div><div class="stat-value" id="h-available">—</div><div class="stat-label">Available</div></div>
+    <div class="stat-card animate-fade-up anim-delay-2"><div class="stat-icon">👥</div><div class="stat-value" id="h-occupied">—</div><div class="stat-label">Occupied</div></div>
+    <div class="stat-card animate-fade-up anim-delay-3"><div class="stat-icon">📋</div><div class="stat-value" id="h-allocations">—</div><div class="stat-label">Active Allocations</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="rooms">Room Overview</button>
+    <button class="tab-btn" data-tab="allocs">Allocations</button>
+    <button class="tab-btn" data-tab="myroom" id="myroom-tab" style="display:none">My Room</button>
+    <button class="tab-btn" data-tab="addroom" id="addroom-tab" style="display:none">Add Room</button>
+  </div>
+
+  <!-- Room Overview -->
+  <div id="tab-rooms">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <select class="form-control" id="block-filter" style="height:36px;width:130px;font-size:0.85rem">
+        <option value="">All Blocks</option>
+      </select>
+      <select class="form-control" id="type-filter" style="height:36px;width:130px;font-size:0.85rem">
+        <option value="">All Types</option>
+        <option>Single</option><option>Double</option><option>Triple</option>
+      </select>
+    </div>
+    <div class="room-grid" id="rooms-grid">
+      <div class="skeleton" style="height:130px;border-radius:12px"></div>
+      <div class="skeleton" style="height:130px;border-radius:12px"></div>
+      <div class="skeleton" style="height:130px;border-radius:12px"></div>
+    </div>
+  </div>
+
+  <!-- Allocations -->
+  <div id="tab-allocs" style="display:none">
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <div class="card-title">Room Allocations</div>
+        <button class="btn btn-primary btn-sm" data-modal-open="allocate-modal" id="alloc-btn" style="display:none">+ Allocate Room</button>
+      </div>
+      <table>
+        <thead><tr><th>Student</th><th>Roll No</th><th>Room</th><th>Block</th><th>Allotted Date</th><th>Status</th><th class="admin-only" style="display:none">Action</th></tr></thead>
+        <tbody id="alloc-tbody"><tr><td colspan="7" class="table-empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- My Room (Student) -->
+  <div id="tab-myroom" style="display:none">
+    <div class="card" id="my-room-card">
+      <div class="empty-state"><div class="empty-state-icon">🏠</div><div class="empty-state-desc">Loading room details...</div></div>
+    </div>
+  </div>
+
+  <!-- Add Room (Admin) -->
+  <div id="tab-addroom" style="display:none">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Add New Room</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group"><label class="form-label">Room No *</label><input class="form-control" id="r-no" placeholder="e.g. A101"/></div>
+        <div class="form-group"><label class="form-label">Block *</label><input class="form-control" id="r-block" placeholder="e.g. A"/></div>
+        <div class="form-group"><label class="form-label">Floor</label><input class="form-control" type="number" id="r-floor" value="1"/></div>
+        <div class="form-group"><label class="form-label">Capacity</label><input class="form-control" type="number" id="r-capacity" value="2"/></div>
+        <div class="form-group"><label class="form-label">Type</label>
+          <select class="form-control" id="r-type"><option>Single</option><option>Double</option><option>Triple</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Monthly Fee (₹)</label><input class="form-control" type="number" id="r-fee" value="3000"/></div>
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">Facilities</label><textarea class="form-control" id="r-facilities" rows="2" placeholder="AC, WiFi, Attached Bath"></textarea></div>
+        <div><button type="button" class="btn btn-primary" id="save-room-btn">Add Room</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Allocate Modal -->
+<div class="modal-backdrop" id="allocate-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Allocate Room</div><button class="modal-close" data-modal-close="allocate-modal">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Student ID</label><input class="form-control" type="number" id="alloc-student"/></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Room ID</label><input class="form-control" type="number" id="alloc-room"/></div>
+      <div class="form-group"><label class="form-label">Allotment Date</label><input class="form-control" type="date" id="alloc-date"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-modal-close="allocate-modal">Cancel</button>
+      <button class="btn btn-primary" id="confirm-alloc-btn">Allocate</button>
+    </div>
+  </div>
+</div>
+
+<button id="chatbot-btn">🤖</button>
+<div id="chatbot-panel">
+  <div class="chatbot-header"><div><div class="chatbot-title">SCMS Assistant</div><div class="chatbot-status">● Online</div></div><button onclick="document.getElementById('chatbot-panel').classList.remove('open')" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:1.1rem">✕</button></div>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row"><input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask anything..."/><button class="chatbot-send" id="chatbot-send">➤</button></div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/three-bg.js"></script>
+<script src="js/gsap-animations.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth(['Admin','Student','Faculty'])) return;
+  const role = Auth.getRole();
+  const user = Auth.getUser();
+  injectSidebar(role);
+  initSidebar(); initModals();
+
+  if (role === 'Admin') {
+    document.getElementById('addroom-tab').style.display = '';
+    document.getElementById('alloc-btn').style.display = '';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+  }
+  if (role === 'Student') {
+    document.getElementById('myroom-tab').style.display = '';
+  }
+
+  document.getElementById('alloc-date').value = new Date().toISOString().slice(0,10);
+
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
+      document.getElementById('tab-'+btn.dataset.tab).style.display='';
+    });
+  });
+
+  // Load rooms
+  let allRooms = [];
+  const roomsData = await API.get('/hostel/rooms');
+  if (roomsData?.success) {
+    allRooms = roomsData.data;
+    const total = allRooms.length;
+    const avail = allRooms.filter(r => r.occupied < r.capacity).length;
+    const occ   = allRooms.reduce((a,r)=>a+r.occupied,0);
+    document.getElementById('h-rooms').textContent = total;
+    document.getElementById('h-available').textContent = avail;
+    document.getElementById('h-occupied').textContent = occ;
+
+    // Block filter options
+    const blocks = [...new Set(allRooms.map(r=>r.block))];
+    const bSel = document.getElementById('block-filter');
+    blocks.forEach(b => { const o=document.createElement('option'); o.value=b; o.textContent=`Block ${b}`; bSel.appendChild(o); });
+
+    function renderRooms(blockFilter='', typeFilter='') {
+      const filtered = allRooms.filter(r =>
+        (!blockFilter || r.block===blockFilter) && (!typeFilter || r.type===typeFilter)
+      );
+      const grid = document.getElementById('rooms-grid');
+      grid.innerHTML = filtered.map(r => {
+        const pct = Math.round((r.occupied/r.capacity)*100);
+        const isFull = r.occupied >= r.capacity;
+        return `<div class="room-card ${isFull?'full':'available'}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div><div class="room-number">${r.room_no}</div><div class="room-block">Block ${r.block} · Floor ${r.floor}</div></div>
+            <span class="badge ${isFull?'badge-danger':'badge-success'}">${isFull?'Full':'Available'}</span>
+          </div>
+          <div class="room-occupancy" style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">
+              <span>${r.type}</span><span>${r.occupied}/${r.capacity}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill ${isFull?'danger':pct>60?'warning':'success'}" style="width:${pct}%"></div></div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">${r.facilities||'—'}</div>
+          <div style="font-weight:600;font-size:0.85rem;margin-top:6px">${fmt.currency(r.monthly_fee)}/month</div>
+        </div>`;
+      }).join('');
+    }
+    renderRooms();
+    document.getElementById('block-filter').addEventListener('change', e => renderRooms(e.target.value, document.getElementById('type-filter').value));
+    document.getElementById('type-filter').addEventListener('change', e => renderRooms(document.getElementById('block-filter').value, e.target.value));
+  }
+
+  // Allocations
+  const allocData = await API.get('/hostel/allocations');
+  const atbody = document.getElementById('alloc-tbody');
+  if (atbody && allocData?.success) {
+    document.getElementById('h-allocations').textContent = allocData.data.filter(a=>a.status==='Active').length;
+    atbody.innerHTML = allocData.data.length
+      ? allocData.data.map(a=>`<tr>
+          <td class="td-primary">${a.student_name}</td>
+          <td>${a.roll_no}</td>
+          <td>${a.room_no}</td>
+          <td>Block ${a.block}</td>
+          <td class="td-muted">${fmt.date(a.allot_date)}</td>
+          <td><span class="badge ${a.status==='Active'?'badge-success':'badge-neutral'}">${a.status}</span></td>
+          ${role==='Admin'&&a.status==='Active'?`<td><button class="btn btn-ghost btn-sm" onclick="vacate(${a.id})">Vacate</button></td>`:'<td>—</td>'}
+        </tr>`).join('')
+      : '<tr><td colspan="7" class="table-empty">No allocations</td></tr>';
+  }
+
+  // My Room (Student)
+  if (role === 'Student') {
+    const myRoom = await API.get(`/hostel/student/${user.id}`);
+    const card = document.getElementById('my-room-card');
+    if (myRoom?.success && myRoom.data) {
+      const r = myRoom.data;
+      card.innerHTML = `
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div style="font-size:3rem">🏠</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:700">Room ${r.room_no}</div>
+            <div style="color:var(--text-muted)">Block ${r.block} · Floor ${r.floor} · ${r.type}</div>
+            <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+              <span class="badge badge-success">Active</span>
+              <span class="badge badge-neutral">${r.facilities||'Standard'}</span>
+              <span class="badge badge-info">${fmt.currency(r.monthly_fee)}/month</span>
+            </div>
+            <div style="margin-top:12px;font-size:0.85rem;color:var(--text-muted)">Allotted: ${fmt.date(r.allot_date)}</div>
+          </div>
+        </div>`;
+    } else {
+      card.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏠</div><div class="empty-state-title">No Room Assigned</div><div class="empty-state-desc">Contact admin for hostel room allocation.</div></div>';
+    }
+  }
+
+  window.vacate = async (id) => {
+    const data = await API.put(`/hostel/vacate/${id}`, {});
+    if (data?.success) { showToast('Room vacated','','success'); setTimeout(()=>location.reload(),800); }
+    else showToast('Error', data?.message, 'error');
+  };
+
+  document.getElementById('confirm-alloc-btn')?.addEventListener('click', async () => {
+    const data = await API.post('/hostel/allocate', {
+      student_id: document.getElementById('alloc-student').value,
+      room_id:    document.getElementById('alloc-room').value,
+      allot_date: document.getElementById('alloc-date').value,
+    });
+    if (data?.success) { showToast('Room allocated!','','success'); closeModal('allocate-modal'); setTimeout(()=>location.reload(),800); }
+    else showToast('Error', data?.message, 'error');
+  });
+
+  document.getElementById('save-room-btn')?.addEventListener('click', async () => {
+    const data = await API.post('/hostel/rooms', {
+      room_no:     document.getElementById('r-no').value,
+      block:       document.getElementById('r-block').value,
+      floor:       document.getElementById('r-floor').value,
+      capacity:    document.getElementById('r-capacity').value,
+      type:        document.getElementById('r-type').value,
+      monthly_fee: document.getElementById('r-fee').value,
+      facilities:  document.getElementById('r-facilities').value,
+    });
+    if (data?.success) { showToast('Room added!','','success'); setTimeout(()=>location.reload(),800); }
+    else showToast('Error', data?.message, 'error');
+  });
+});
+</script>
+</body>
+</html>
