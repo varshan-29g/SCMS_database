@@ -146,12 +146,27 @@
 <script src="js/three-bg.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Redirect if already logged in
+  // If already logged in, keep the login page visible and show a notice.
   if (Auth.isLoggedIn()) {
     const role = Auth.getRole();
-    window.location.href = role === 'Admin' ? 'admin-dashboard.html'
-      : role === 'Student' ? 'student-dashboard.html' : 'faculty-dashboard.html';
-    return;
+    if (!['Admin', 'Student', 'Faculty'].includes(role)) {
+      Auth.clear();
+    } else {
+      const warning = document.createElement('div');
+      warning.style = 'margin-bottom:16px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:0.95rem;';
+      warning.innerHTML = `You are currently signed in as ${role}. To switch accounts, click the button below.`;
+      const switchBtn = document.createElement('button');
+      switchBtn.type = 'button';
+      switchBtn.className = 'btn btn-secondary';
+      switchBtn.style = 'margin-top:12px;';
+      switchBtn.textContent = 'Log out / Switch account';
+      switchBtn.addEventListener('click', () => {
+        Auth.clear();
+        window.location.reload();
+      });
+      warning.appendChild(switchBtn);
+      document.querySelector('.auth-form-wrap').prepend(warning);
+    }
   }
 
   // Check URL for tab

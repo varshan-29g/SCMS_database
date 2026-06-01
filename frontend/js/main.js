@@ -106,6 +106,11 @@ function toggleTheme() {
   if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
+function initCursor() {
+  // Custom cursor is not implemented in this build.
+  // This stub prevents runtime errors on pages that include main.js.
+}
+
 /* ─── Sidebar ───────────────────────────────────────────────── */
 function initSidebar() {
   const sidebar  = document.getElementById('sidebar');
