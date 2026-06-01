@@ -22,9 +22,9 @@ const Auth = {
   },
   isLoggedIn: () => !!localStorage.getItem('scms_token'),
   requireAuth(allowedRoles = []) {
-    if (!this.isLoggedIn()) { window.location.href = '/frontend/login.html'; return false; }
+    if (!this.isLoggedIn()) { window.location.href = 'login.html'; return false; }
     if (allowedRoles.length && !allowedRoles.includes(this.getRole())) {
-      window.location.href = '/frontend/login.html'; return false;
+      window.location.href = 'login.html'; return false;
     }
     return true;
   }
@@ -42,7 +42,7 @@ const API = {
     const data = await res.json();
     if (res.status === 401 || res.status === 403) {
       Auth.clear();
-      window.location.href = '/frontend/login.html';
+      window.location.href = 'login.html';
       return;
     }
     return data;
@@ -155,7 +155,7 @@ function initSidebar() {
   const logoutBtn = document.getElementById('logout-btn');
   logoutBtn && logoutBtn.addEventListener('click', () => {
     Auth.clear();
-    window.location.href = '/frontend/login.html';
+    window.location.href = 'login.html';
   });
 }
 
