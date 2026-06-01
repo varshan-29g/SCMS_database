@@ -39,11 +39,11 @@ INSERT INTO departments (name, code, hod_name, description) VALUES
 
 -- Faculty (password: Faculty@123)
 INSERT INTO faculty (faculty_id, name, email, password, phone, department_id, designation, qualification, experience_yrs, joined_date) VALUES
-('FAC001', 'Dr. Ramesh Kumar',  'ramesh@scms.edu',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17ltu2', '9111222333', 1, 'Professor',          'PhD CSE',  15, '2010-07-01'),
-('FAC002', 'Dr. Priya Singh',   'priya@scms.edu',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17ltu2', '9222333444', 2, 'Associate Professor', 'PhD ECE',  10, '2014-07-01'),
-('FAC003', 'Prof. Anil Sharma', 'anil@scms.edu',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17ltu2', '9333444555', 3, 'Assistant Professor', 'M.Tech ME', 6, '2018-07-01'),
-('FAC004', 'Dr. Neha Verma',    'neha@scms.edu',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17ltu2', '9444555666', 4, 'Professor',           'PhD CE',   12, '2012-07-01'),
-('FAC005', 'Dr. Vikram Das',    'vikram@scms.edu',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17ltu2', '9555666777', 5, 'Associate Professor', 'PhD IT',    8, '2016-07-01');
+('FAC001', 'Dr. Ramesh Kumar',  'ramesh@scms.edu',  '$2a$10$xXWujepLt07dquQ8gV0u0e1MeoYvTYkKhtLLxP.C.A21FZsYRPOBC', '9111222333', 1, 'Professor',          'PhD CSE',  15, '2010-07-01'),
+('FAC002', 'Dr. Priya Singh',   'priya@scms.edu',   '$2a$10$xXWujepLt07dquQ8gV0u0e1MeoYvTYkKhtLLxP.C.A21FZsYRPOBC', '9222333444', 2, 'Associate Professor', 'PhD ECE',  10, '2014-07-01'),
+('FAC003', 'Prof. Anil Sharma', 'anil@scms.edu',    '$2a$10$xXWujepLt07dquQ8gV0u0e1MeoYvTYkKhtLLxP.C.A21FZsYRPOBC', '9333444555', 3, 'Assistant Professor', 'M.Tech ME', 6, '2018-07-01'),
+('FAC004', 'Dr. Neha Verma',    'neha@scms.edu',    '$2a$10$xXWujepLt07dquQ8gV0u0e1MeoYvTYkKhtLLxP.C.A21FZsYRPOBC', '9444555666', 4, 'Professor',           'PhD CE',   12, '2012-07-01'),
+('FAC005', 'Dr. Vikram Das',    'vikram@scms.edu',  '$2a$10$xXWujepLt07dquQ8gV0u0e1MeoYvTYkKhtLLxP.C.A21FZsYRPOBC', '9555666777', 5, 'Associate Professor', 'PhD IT',    8, '2016-07-01');
 
 -- Students (password: Student@123)
 INSERT INTO students (student_id, name, email, password, phone, dob, gender, department_id, semester, batch_year, guardian_name, guardian_phone) VALUES
