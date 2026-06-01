@@ -10,7 +10,7 @@ router.get('/',          requireRole('Admin', 'Faculty'), ctrl.getAll);
 router.get('/stats',     requireRole('Admin'),            ctrl.getStats);
 router.get('/:id',                                        ctrl.getById);
 router.post('/',         requireRole('Admin'),            ctrl.create);
-router.put('/:id',       requireRole('Admin', 'Student'), ctrl.update);
+router.put('/:id',       requireRole('Admin', 'Faculty', 'Student'), ctrl.update);
 router.delete('/:id',    requireRole('Admin'),            ctrl.remove);
 router.put('/:id/avatar',upload.single('avatar'),         ctrl.uploadAvatar);
 
