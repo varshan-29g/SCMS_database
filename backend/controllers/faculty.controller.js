@@ -101,10 +101,15 @@ exports.applyLeave = async (req, res) => {
 
 exports.getAllLeaves = async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT lr.*, f.name AS faculty_name, f.faculty_id FROM leave_requests lr
-       JOIN faculty f ON lr.faculty_id=f.id ORDER BY lr.created_at DESC`
-    );
+    let q = `SELECT lr.*, f.name AS faculty_name, f.faculty_id FROM leave_requests lr
+       JOIN faculty f ON lr.faculty_id=f.id`;
+    const params = [];
+    if (req.user.role === 'Faculty') {
+      q += ` WHERE lr.faculty_id = ?`;
+      params.push(req.user.id);
+    }
+    q += ` ORDER BY lr.created_at DESC`;
+    const [rows] = await pool.query(q, params);
     res.json({ success: true, data: rows });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };

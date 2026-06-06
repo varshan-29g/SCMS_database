@@ -15,7 +15,7 @@ router.delete('/:id',        requireRole('Admin'),                    ctrl.remov
 router.put('/:id/avatar',    upload.single('avatar'),                 ctrl.uploadAvatar);
 router.get('/:id/subjects',                                           ctrl.getSubjects);
 router.post('/leave',        requireRole('Faculty'),                  ctrl.applyLeave);
-router.get('/leave/all',     requireRole('Admin'),                    ctrl.getAllLeaves);
+router.get('/leave/all',     requireRole('Admin', 'Faculty'),        ctrl.getAllLeaves);
 router.put('/leave/:leaveId/status', requireRole('Admin'),            ctrl.updateLeaveStatus);
 router.post('/:id/upload-material', upload.single('material'),        ctrl.uploadMaterial);
 

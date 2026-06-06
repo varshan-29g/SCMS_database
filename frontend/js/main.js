@@ -9,11 +9,15 @@ const API_BASE = 'http://localhost:5000/api';
 const Auth = {
   getToken: () => localStorage.getItem('scms_token'),
   getUser:  () => { try { return JSON.parse(localStorage.getItem('scms_user')); } catch { return null; } },
-  getRole:  () => localStorage.getItem('scms_role'),
+  getRole:  () => {
+    const r = localStorage.getItem('scms_role');
+    return r ? (r.charAt(0).toUpperCase() + r.slice(1).toLowerCase()) : null;
+  },
   setSession(token, user, role) {
+    const normRole = role ? (role.toString().charAt(0).toUpperCase() + role.toString().slice(1).toLowerCase()) : '';
     localStorage.setItem('scms_token', token);
     localStorage.setItem('scms_user',  JSON.stringify(user));
-    localStorage.setItem('scms_role',  role);
+    localStorage.setItem('scms_role',  normRole);
   },
   clear() {
     localStorage.removeItem('scms_token');
@@ -23,8 +27,10 @@ const Auth = {
   isLoggedIn: () => !!localStorage.getItem('scms_token'),
   requireAuth(allowedRoles = []) {
     if (!this.isLoggedIn()) { window.location.href = 'login.html'; return false; }
-    if (allowedRoles.length && !allowedRoles.includes(this.getRole())) {
-      window.location.href = 'login.html'; return false;
+    if (allowedRoles.length) {
+      const role = this.getRole();
+      const allowedNorm = allowedRoles.map(r => r.charAt(0).toUpperCase() + r.slice(1).toLowerCase());
+      if (!allowedNorm.includes(role)) { window.location.href = 'login.html'; return false; }
     }
     return true;
   }

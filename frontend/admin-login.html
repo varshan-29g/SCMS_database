@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Login — SCMS</title>
+<meta name="description" content="Administrator Login to Smart Campus Management System"/>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/pages.css"/>
+<style>
+  .password-wrap { position:relative; }
+  .password-wrap .form-control { padding-right: 44px; }
+  .pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem; }
+  .auth-left { background: linear-gradient(135deg, #44337a 0%, #1a202c 100%); }
+</style>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div id="page-overlay"></div>
+
+<div class="auth-page">
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="auth-left-logo">SC<span>M</span>S</div>
+      <p style="color:#b7791f;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;font-size:0.8rem;margin-bottom:8px">Administrative Portal</p>
+      <p class="auth-left-desc">System Administration and Campus Operations. Manage student admissions, faculty roster, department divisions, hostel setup, book catalogs, and fee collections.</p>
+      <div class="auth-features">
+        <div class="auth-feature"><span class="auth-feature-icon">🛡️</span> Secure multi-role access control</div>
+        <div class="auth-feature"><span class="auth-feature-icon">👥</span> Complete user roster database controls</div>
+        <div class="auth-feature"><span class="auth-feature-icon">💳</span> System-wide fee and payment analytics</div>
+        <div class="auth-feature"><span class="auth-feature-icon">🔔</span> Publish global alerts and notifications</div>
+      </div>
+      <div style="margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.08)">
+        <p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin-bottom:10px">Demo Administrator Credentials</p>
+        <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px">
+          <p style="color:rgba(255,255,255,0.8);font-size:0.78rem;font-weight:600">Admin Account</p>
+          <p style="color:rgba(255,255,255,0.4);font-size:0.72rem">admin@scms.edu / Admin@123</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <!-- Login Tab -->
+      <div id="login-tab">
+        <h1 class="auth-title">Admin Sign In</h1>
+        <p class="auth-subtitle">Enter your administration credentials</p>
+        <form class="auth-form" id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Admin Email</label>
+            <input class="form-control" type="email" id="login-email" placeholder="admin@scms.edu" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <div class="password-wrap">
+              <input class="form-control" type="password" id="login-password" placeholder="Enter your password" required/>
+              <button type="button" class="pw-toggle" id="pw-toggle-login">👁</button>
+            </div>
+          </div>
+          <div id="login-error" style="color:var(--danger);font-size:0.8rem;display:none"></div>
+          <button type="submit" class="btn btn-primary" id="login-btn" style="width:100%;height:46px;font-size:0.95rem;margin-top:4px">
+            Authenticate Session
+          </button>
+        </form>
+      </div>
+
+      <div style="margin-top:24px;text-align:center">
+        <button id="theme-toggle" class="btn btn-ghost btn-sm">🌙 Toggle Theme</button>
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:8px">← Main Website</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/three-bg.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (Auth.isLoggedIn() && Auth.getRole() === 'Admin') {
+    window.location.href = 'admin-dashboard.html';
+    return;
+  } else if (Auth.isLoggedIn()) {
+    Auth.clear();
+  }
+
+  // Password toggle
+  function setupPwToggle(inputId, toggleId) {
+    document.getElementById(toggleId).addEventListener('click', () => {
+      const inp = document.getElementById(inputId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    });
+  }
+  setupPwToggle('login-password', 'pw-toggle-login');
+
+  // LOGIN submit
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    errEl.style.display = 'none';
+    try {
+      const data = await API.post('/auth/login', {
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value,
+        role: 'Admin'
+      });
+      if (data && data.success) {
+        Auth.setSession(data.token, data.user, data.role);
+        showToast('Login successful', `Welcome back, ${data.user.name}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'admin-dashboard.html';
+        }, 800);
+      } else {
+        errEl.textContent = data?.message || 'Invalid credentials.';
+        errEl.style.display = 'block';
+      }
+    } catch (err) {
+      errEl.textContent = 'Connection error. Ensure backend is running on port 5000.';
+      errEl.style.display = 'block';
+    }
+    btn.classList.remove('btn-loading'); btn.disabled = false;
+  });
+});
+</script>
+</body>
+</html>

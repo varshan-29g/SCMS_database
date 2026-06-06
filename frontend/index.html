@@ -29,13 +29,13 @@
     <div class="landing-logo">SC<span>M</span>S</div>
     <div class="landing-nav-links">
       <a href="#features">Features</a>
-      <a href="#modules">Modules</a>
+      <a href="#portals">Portal Modules</a>
       <a href="#about">About</a>
     </div>
     <div class="landing-nav-actions">
       <button id="theme-toggle" class="btn btn-ghost btn-sm">🌙</button>
-      <a href="login.html" class="btn btn-secondary btn-sm">Login</a>
-      <a href="login.html?tab=register" class="btn btn-primary btn-sm">Get Started</a>
+      <a href="#portals" class="btn btn-secondary btn-sm">Login</a>
+      <a href="student-login.html?tab=register" class="btn btn-primary btn-sm">Get Started</a>
     </div>
   </nav>
 
@@ -45,7 +45,7 @@
     <h1 class="hero-title">Smart Campus<br/><span>Management</span><br/>System</h1>
     <p class="hero-desc">A next-generation, fully integrated university management platform combining AI analytics, real-time tracking, and seamless administration.</p>
     <div class="hero-actions">
-      <a href="login.html" class="btn btn-primary btn-lg">🚀 Launch Dashboard</a>
+      <a href="#portals" class="btn btn-primary btn-lg">🚀 Launch Dashboard</a>
       <a href="#features"  class="btn btn-ghost btn-lg">Explore Features</a>
     </div>
     <div class="hero-stats">
@@ -68,8 +68,46 @@
     </div>
   </section>
 
+  <!-- Portal Modules -->
+  <section id="portals" style="position:relative;z-index:1;padding:60px 60px 20px;max-width:1200px;margin:0 auto">
+    <h2 style="font-family:var(--font-display);font-size:2.2rem;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:-0.02em">Select Your Portal</h2>
+    <p style="text-align:center;color:var(--text-muted);margin-bottom:48px;font-size:1rem">Enter the specific module designed for your campus role</p>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:30px">
+      <!-- Admin Card -->
+      <div class="feature-card" style="border-top: 4px solid #44337a; text-align: center; align-items: center; justify-content: space-between; min-height: 280px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div style="font-size:3rem;margin-bottom:8px">🛡️</div>
+          <h3 style="font-size:1.4rem;font-weight:700">Administrator Portal</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5">Configure departments, assign faculty, adjust course parameters, manage hostel occupancy, and oversee general campus operations.</p>
+        </div>
+        <a href="admin-login.html" class="btn btn-primary" style="margin-top:20px;width:100%">Access Admin Portal</a>
+      </div>
+
+      <!-- Faculty Card -->
+      <div class="feature-card" style="border-top: 4px solid #2c7a7b; text-align: center; align-items: center; justify-content: space-between; min-height: 280px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div style="font-size:3rem;margin-bottom:8px">👨‍🏫</div>
+          <h3 style="font-size:1.4rem;font-weight:700">Faculty Portal</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5">View your assigned subjects, mark daily class attendance in bulk, publish grades, upload course material, and request leaves.</p>
+        </div>
+        <a href="faculty-login.html" class="btn btn-primary" style="margin-top:20px;width:100%">Access Faculty Portal</a>
+      </div>
+
+      <!-- Student Card -->
+      <div class="feature-card" style="border-top: 4px solid #2b6cb0; text-align: center; align-items: center; justify-content: space-between; min-height: 280px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div style="font-size:3rem;margin-bottom:8px">🎓</div>
+          <h3 style="font-size:1.4rem;font-weight:700">Student Portal</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5">Check your current attendance stats, view your weekly class schedule, check grades, and view and pay outstanding tuition fees.</p>
+        </div>
+        <a href="student-login.html" class="btn btn-primary" style="margin-top:20px;width:100%">Access Student Portal</a>
+      </div>
+    </div>
+  </section>
+
   <!-- Features -->
-  <section id="features" style="position:relative;z-index:1;padding:0 60px 20px">
+  <section id="features" style="position:relative;z-index:1;padding:40px 60px 20px">
     <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:-0.02em">Everything in One Place</h2>
     <p style="text-align:center;color:var(--text-muted);margin-bottom:48px;font-size:0.95rem">All campus operations unified under a single intelligent platform</p>
   </section>
